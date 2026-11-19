@@ -1,0 +1,315 @@
+{
+  "phase1": {
+    "finished": true,
+    "metrics": {
+      "askGlobalMs": 855,
+      "askMeetingMs": 1347,
+      "enhanceMs": 6435,
+      "framesWhileDownloading": {
+        "frames": 296,
+        "maxGapMs": 32,
+        "over100ms": 0,
+        "over50ms": 0,
+        "p95GapMs": 16
+      },
+      "framesWhileEnhancing": {
+        "frames": 570,
+        "maxGapMs": 28,
+        "over100ms": 0,
+        "over50ms": 0,
+        "p95GapMs": 16
+      },
+      "liveTranscriptLatencyMs": 4598,
+      "longFrames": [],
+      "navAskMs": 31,
+      "navHomeMs": 31,
+      "navModelsMs": 31,
+      "navSettingsMs": 31,
+      "notesAppearedAt": 44687,
+      "recordStartMs": 339,
+      "searchMs": 154,
+      "stopToReadyMs": 237,
+      "typingWhileRecording": {
+        "frames": 538,
+        "maxGapMs": 29,
+        "over100ms": 0,
+        "over50ms": 0,
+        "p95GapMs": 16
+      }
+    },
+    "phase": "1",
+    "results": [
+      {
+        "info": {
+          "hardware": "ChipApple M4 ProMemory24 GB"
+        },
+        "ms": 66,
+        "name": "onboarding: welcome \u2192 privacy \u2192 hardware",
+        "ok": true
+      },
+      {
+        "ms": 125,
+        "name": "onboarding: languages",
+        "ok": true
+      },
+      {
+        "info": {
+          "seconds": 4.5
+        },
+        "ms": 4505,
+        "name": "onboarding: download recommended models (verifies existing files, SHA-256)",
+        "ok": true
+      },
+      {
+        "info": {
+          "mic": "Allow",
+          "system": "Heard"
+        },
+        "ms": 5355,
+        "name": "onboarding: permissions + audio test (system audio)",
+        "ok": true
+      },
+      {
+        "ms": 62,
+        "name": "onboarding: finish",
+        "ok": true
+      },
+      {
+        "ms": 62,
+        "name": "settings: microphone Off (computer audio only)",
+        "ok": true
+      },
+      {
+        "ms": 156,
+        "name": "settings: create, edit and list a custom template",
+        "ok": true
+      },
+      {
+        "info": {
+          "recordStartMs": 339
+        },
+        "ms": 371,
+        "name": "home \u2192 Record starts a meeting and recording",
+        "ok": true
+      },
+      {
+        "info": {
+          "frames": 538,
+          "maxGapMs": 29,
+          "over100ms": 0,
+          "over50ms": 0,
+          "p95GapMs": 16
+        },
+        "ms": 7502,
+        "name": "title + notes while recording (typing smoothness)",
+        "ok": true
+      },
+      {
+        "info": {
+          "afterSpeechEndMs": 4598
+        },
+        "ms": 4599,
+        "name": "live transcript shows speech (chunked)",
+        "ok": true
+      },
+      {
+        "ms": 14211,
+        "name": "mark moment, pause (speech not recorded), resume",
+        "ok": true
+      },
+      {
+        "info": {
+          "marks": true,
+          "stopToReadyMs": 237
+        },
+        "ms": 269,
+        "name": "stop \u2192 transcript finalised",
+        "ok": true
+      },
+      {
+        "info": {
+          "enhanceMs": 6435,
+          "frames": {
+            "frames": 570,
+            "maxGapMs": 28,
+            "over100ms": 0,
+            "over50ms": 0,
+            "p95GapMs": 16
+          },
+          "hasActions": true,
+          "hasDecisions": true
+        },
+        "ms": 7968,
+        "name": "enhance notes (local LLM) with smooth UI",
+        "ok": true
+      },
+      {
+        "ms": 65,
+        "name": "timestamp source link opens the transcript at that moment",
+        "ok": true
+      },
+      {
+        "ms": 31,
+        "name": "toggle an action item done",
+        "ok": true
+      },
+      {
+        "ms": 5224,
+        "name": "regenerate with custom template \u2192 version history",
+        "ok": true
+      },
+      {
+        "ms": 815,
+        "name": "edit enhanced notes; edits persist",
+        "ok": true
+      },
+      {
+        "ms": 176,
+        "name": "correct a transcript line; original kept",
+        "ok": true
+      },
+      {
+        "info": {
+          "askMs": 1347
+        },
+        "ms": 1410,
+        "name": "ask about this meeting (side panel) with sources",
+        "ok": true
+      },
+      {
+        "info": {
+          "searchMs": 154,
+          "semantic": false
+        },
+        "ms": 352,
+        "name": "\u2318K search: keyword, filter, by meaning, Enter opens",
+        "ok": true
+      },
+      {
+        "info": {
+          "askGlobalMs": 855
+        },
+        "ms": 1698,
+        "name": "Ask Grain page: answer with citations, refusal without sources, history",
+        "ok": true
+      },
+      {
+        "ms": 124,
+        "name": "Action items page: done filter, assigned to me",
+        "ok": true
+      },
+      {
+        "info": {
+          "json": 9440,
+          "md": 1327,
+          "wav": 674592
+        },
+        "ms": 344,
+        "name": "export Markdown, JSON, WAV",
+        "ok": true
+      },
+      {
+        "ms": 269,
+        "name": "re-transcribe with the current model",
+        "ok": true
+      },
+      {
+        "ms": 625,
+        "name": "delete audio only (transcript kept)",
+        "ok": true
+      },
+      {
+        "info": {
+          "rowsAll": 73,
+          "rowsDefault": 29
+        },
+        "ms": 72,
+        "name": "models: search by language, show all",
+        "ok": true
+      },
+      {
+        "info": {
+          "frames": 296,
+          "maxGapMs": 32,
+          "over100ms": 0,
+          "over50ms": 0,
+          "p95GapMs": 16
+        },
+        "ms": 4153,
+        "name": "models: pick quant, download, cancel, resume, auto-activate",
+        "ok": true
+      },
+      {
+        "ms": 145,
+        "name": "models: switch back (Use) and delete with confirmation",
+        "ok": true
+      },
+      {
+        "ms": 403,
+        "name": "models: add a local .gguf file, then remove it",
+        "ok": true
+      },
+      {
+        "info": {
+          "becameActive": true,
+          "originalBytes": 2185030624,
+          "verifyAndCloneMs": 4031
+        },
+        "ms": 4162,
+        "name": "models: model another app downloaded (Handy) is used with no download",
+        "ok": true
+      },
+      {
+        "info": {
+          "listed": true
+        },
+        "ms": 33,
+        "name": "models: other apps' models are listed (LM Studio)",
+        "ok": true
+      },
+      {
+        "ms": 61,
+        "name": "models: notes & search tabs",
+        "ok": true
+      },
+      {
+        "ms": 279,
+        "name": "settings: every section renders",
+        "ok": true
+      },
+      {
+        "ms": 260,
+        "name": "keyboard shortcuts: \u2318N \u23182 \u23183 \u23181 \u2318[ \u2318, \u2318J",
+        "ok": true
+      },
+      {
+        "ms": 95,
+        "name": "delete an empty meeting from the list",
+        "ok": true
+      },
+      {
+        "ms": 7483,
+        "name": "crash while recording (phase 2 verifies recovery)",
+        "ok": true
+      }
+    ]
+  },
+  "phase2": {
+    "finished": true,
+    "metrics": {},
+    "phase": "2",
+    "results": [
+      {
+        "ms": 33,
+        "name": "relaunch after crash: interrupted meeting recovered",
+        "ok": true
+      },
+      {
+        "ms": 61,
+        "name": "transcribe the recovered audio",
+        "ok": true
+      }
+    ]
+  },
+  "orphanHelpersAfterCrash": 0
+}

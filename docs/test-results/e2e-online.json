@@ -1,0 +1,554 @@
+{
+  "ask": [
+    {
+      "answer": "We decided to ship the Atlas beta build to customers on Friday [1][2][3][4][5][6][7][8][9]. The beta build had passed QA and the team agreed to proceed with the launch [1][2][4][5][6][7][8][9]. The current price of $40 per seat will be maintained for now, with a commitment to review pricing in January [1][2][3][4][5][6][7][8][9]. No decision was made on offering an annual discount, and the response to Northwind’s feedback about the price being too high for small teams remains an open question [1][2][4][5][6][7][8][9]. A referral program is suggested as a future initiative but no commitment has been made to implement it [1][2][3][4][5][6][7][8][9]. Me will update the pricing page before the launch [1][2][4][5][6][7][8][9].",
+      "question": "What did we decide about the beta launch?",
+      "seconds": 9.115388333,
+      "sources": [
+        {
+          "kind": "enhanced",
+          "meeting": "Atlas Launch Meeting",
+          "n": 1,
+          "startMs": null
+        },
+        {
+          "kind": "enhanced",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 2,
+          "startMs": null
+        },
+        {
+          "kind": "segment",
+          "meeting": "Atlas Launch Meeting",
+          "n": 3,
+          "startMs": 640
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 4,
+          "startMs": 0
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 5,
+          "startMs": 18000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 6,
+          "startMs": 78000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 7,
+          "startMs": 138000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 8,
+          "startMs": 198000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 9,
+          "startMs": 258000
+        }
+      ]
+    },
+    {
+      "answer": "The customer from Northwind said the price of $40 per seat is too high for small teams [11][2].",
+      "question": "What did the customer say about pricing?",
+      "seconds": 3.03106525,
+      "sources": [
+        {
+          "kind": "enhanced",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 2,
+          "startMs": null
+        },
+        {
+          "kind": "segment",
+          "meeting": "Atlas Launch Meeting",
+          "n": 11,
+          "startMs": 25590
+        }
+      ]
+    },
+    {
+      "answer": "The action items are:\n\n- Write the release notes for the Atlas beta launch — owner: Priya [1][8]  \n- Update the pricing page before the launch — owner: Me [1][2][5][7][8]  \n- Revisit pricing strategy in January — owner: Me — due: by January [3][7][8]  \n- Investigate a referral program at some point (suggested, not agreed) [4][6][7][8]  \n\nNote: The referral program action is suggested and not agreed upon, so it is not a binding commitment.",
+      "question": "What action items are there?",
+      "seconds": 5.931041291,
+      "sources": [
+        {
+          "kind": "action",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 1,
+          "startMs": null
+        },
+        {
+          "kind": "action",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 2,
+          "startMs": null
+        },
+        {
+          "kind": "action",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 3,
+          "startMs": null
+        },
+        {
+          "kind": "action",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 4,
+          "startMs": null
+        },
+        {
+          "kind": "action",
+          "meeting": "Atlas Launch Meeting",
+          "n": 5,
+          "startMs": null
+        },
+        {
+          "kind": "action",
+          "meeting": "Atlas Launch Meeting",
+          "n": 6,
+          "startMs": null
+        },
+        {
+          "kind": "enhanced",
+          "meeting": "Atlas Launch Meeting",
+          "n": 7,
+          "startMs": null
+        },
+        {
+          "kind": "enhanced",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 8,
+          "startMs": null
+        }
+      ]
+    },
+    {
+      "answer": "I could not find it in their meetings.",
+      "question": "What is the budget for the office party?",
+      "seconds": 2.447854458,
+      "sources": [
+        {
+          "kind": "enhanced",
+          "meeting": "Atlas Launch Meeting",
+          "n": 1,
+          "startMs": null
+        },
+        {
+          "kind": "enhanced",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 2,
+          "startMs": null
+        },
+        {
+          "kind": "segment",
+          "meeting": "Atlas Launch Meeting",
+          "n": 3,
+          "startMs": 640
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 4,
+          "startMs": 0
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 5,
+          "startMs": 18000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 6,
+          "startMs": 78000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 7,
+          "startMs": 138000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 8,
+          "startMs": 198000
+        },
+        {
+          "kind": "segment",
+          "meeting": "Long meeting (map-reduce test)",
+          "n": 9,
+          "startMs": 258000
+        },
+        {
+          "kind": "manual",
+          "meeting": "Atlas Launch Meeting",
+          "n": 10,
+          "startMs": null
+        }
+      ]
+    }
+  ],
+  "asr": [
+    {
+      "clips": [
+        {
+          "audioSeconds": 5.4223125,
+          "clip": "en",
+          "errorRate": 0.0,
+          "hypothesis": "The quarterly report is due next Tuesday, and the marketing team needs two more weeks to finish the campaign.",
+          "language": "en",
+          "realtimeFactor": 70.15995988872355,
+          "reference": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+          "seconds": 0.077285
+        },
+        {
+          "audioSeconds": 5.4223125,
+          "clip": "en-noise15dB",
+          "errorRate": 0.0,
+          "hypothesis": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+          "language": "en",
+          "realtimeFactor": 93.05323019309596,
+          "reference": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+          "seconds": 0.058271083
+        }
+      ],
+      "model": "parakeet-unified-en-0.6b",
+      "silenceGated": true
+    },
+    {
+      "clips": [
+        {
+          "audioSeconds": 5.4223125,
+          "clip": "en",
+          "errorRate": 0.0,
+          "hypothesis": "The quarterly report is due next Tuesday, and the marketing team needs two more weeks to finish the campaign.",
+          "language": "en",
+          "realtimeFactor": 5.783332194740988,
+          "reference": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+          "seconds": 0.937575833
+        },
+        {
+          "audioSeconds": 6.3545625,
+          "clip": "zh",
+          "errorRate": 0.0,
+          "hypothesis": "我们下周二之前需要完成季度报告。市场团队还需要两周时间。",
+          "language": "zh",
+          "realtimeFactor": 39.003191589127475,
+          "reference": "我们下周二之前需要完成季度报告，市场团队还需要两周时间。",
+          "seconds": 0.162924167
+        },
+        {
+          "audioSeconds": 6.0968125,
+          "clip": "yue",
+          "errorRate": 0.2692307692307692,
+          "hypothesis": "我哋下个礼拜二之前要完成季度报告，市场部仲需要两个礼拜。",
+          "language": "yue",
+          "realtimeFactor": 36.984224957385244,
+          "reference": "我哋下個禮拜二之前要完成季度報告，市場部仲需要兩個禮拜。",
+          "seconds": 0.164849
+        },
+        {
+          "audioSeconds": 4.153375,
+          "clip": "ms",
+          "errorRate": 0.0,
+          "hypothesis": "Laporan suku tahunan perlu disiapkan sebelum hari selasa depan.",
+          "language": "ms",
+          "realtimeFactor": 18.70712326446968,
+          "reference": "Laporan suku tahunan perlu disiapkan sebelum hari Selasa depan.",
+          "seconds": 0.222021042
+        },
+        {
+          "audioSeconds": 4.0695625,
+          "clip": "id",
+          "errorRate": 0.0,
+          "hypothesis": "Laporan triwulanan harus selesai sebelum hari selasa depan.",
+          "language": "id",
+          "realtimeFactor": 31.59652404286965,
+          "reference": "Laporan triwulanan harus selesai sebelum hari Selasa depan.",
+          "seconds": 0.128797791
+        },
+        {
+          "audioSeconds": 5.51625,
+          "clip": "ja",
+          "errorRate": 0.03571428571428571,
+          "hypothesis": "市半期報告書は来週の火曜日までに完成させる必要があります。",
+          "language": "ja",
+          "realtimeFactor": 39.85044709655115,
+          "reference": "四半期報告書は来週の火曜日までに完成させる必要があります。",
+          "seconds": 0.138423792
+        },
+        {
+          "audioSeconds": 3.30275,
+          "clip": "ko",
+          "errorRate": 0.0,
+          "hypothesis": "분기보고서는 다음 주 화요일까지 완성해야 합니다.",
+          "language": "ko",
+          "realtimeFactor": 20.03861806190721,
+          "reference": "분기 보고서는 다음 주 화요일까지 완성해야 합니다.",
+          "seconds": 0.16481925
+        },
+        {
+          "audioSeconds": 5.593125,
+          "clip": "en+zh",
+          "errorRate": 0.5238095238095238,
+          "hypothesis": "Let's finalize the budget today. I think the price is too expensive. Can we get a discount?",
+          "language": "en",
+          "realtimeFactor": 29.475779729727947,
+          "reference": "Let's finalise the budget today. 我觉得这个价格太贵了。 Can we get a discount?",
+          "seconds": 0.18975325
+        },
+        {
+          "audioSeconds": 4.7025,
+          "clip": "en+ms",
+          "errorRate": 0.0,
+          "hypothesis": "Okay, team. The deadline is Friday. Saya akan siapkan laporan itu.",
+          "language": "en",
+          "realtimeFactor": 29.135439521503454,
+          "reference": "Okay team, the deadline is Friday. Saya akan siapkan laporan itu.",
+          "seconds": 0.161401375
+        },
+        {
+          "audioSeconds": 5.4223125,
+          "clip": "en-noise15dB",
+          "errorRate": 0.0,
+          "hypothesis": "The quarterly report is due next Tuesday, and the marketing team needs two more weeks to finish the campaign.",
+          "language": "en",
+          "realtimeFactor": 33.80310562690898,
+          "reference": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+          "seconds": 0.160408708
+        }
+      ],
+      "model": "Qwen3-ASR-0.6B",
+      "silenceGated": true
+    }
+  ],
+  "capture": {
+    "durationMs": 8599,
+    "pausedSpeechLeaked": false,
+    "recordings": [
+      {
+        "durationMs": 8599,
+        "id": "861a064f-d540-4392-9e11-29e1b264a694",
+        "meetingId": "2055f751-4ad0-47b2-8ffa-c77051a0a204",
+        "path": "/Users/junbin/Library/Caches/grain-e2e/recordings/2055f751-4ad0-47b2-8ffa-c77051a0a204/system.pcm",
+        "sampleRate": 16000,
+        "source": "system",
+        "status": "complete"
+      }
+    ],
+    "started": true,
+    "status": "done",
+    "transcript": "The quarterly report is due next Tuesday and the marketing team needs two more weeks to finish the campaign.",
+    "wallSeconds": 16.27408925,
+    "wer": 0.0
+  },
+  "enhance": {
+    "actionItems": [
+      {
+        "createdAt": 1795018729958,
+        "deadline": null,
+        "description": "update the pricing page before the launch",
+        "evidence": [
+          2,
+          4
+        ],
+        "id": 1,
+        "kind": "commitment",
+        "meetingId": "0ccc2ebb-5119-4bf3-8c4e-a15074b450a7",
+        "owner": "Me",
+        "status": "open",
+        "verified": true
+      },
+      {
+        "createdAt": 1795018729958,
+        "deadline": null,
+        "description": "look into a referral program at some point",
+        "evidence": [
+          3
+        ],
+        "id": 2,
+        "kind": "suggestion",
+        "meetingId": "0ccc2ebb-5119-4bf3-8c4e-a15074b450a7",
+        "owner": "Someone (unspecified)",
+        "status": "open",
+        "verified": true
+      }
+    ],
+    "error": null,
+    "markdown": "## Summary\n\nThe Atlas beta launch is scheduled for Friday, with the team agreeing to ship the build and maintain the $40 per seat price for now. Pricing will be reviewed in January. Northwind has raised concerns about the price being too high for small teams, which remains an open question for future discussion. A referral program is noted as a potential future feature, but no commitment has been made to implement it. Me will update the pricing page ahead of launch.\n\n## Launch Timeline\n\n- Beta build passed QA and will ship on Friday [00:00](#t=640)\n- Me will update the pricing page before launch [00:06](#t=6800)\n\n## Pricing Strategy\n\n- Current price of $40 per seat will be maintained for now [00:25](#t=25590)\n- Northwind customer expressed concern that $40 per seat is too high for small teams [00:29](#t=29500)\n- Pricing will be reviewed in January [00:25](#t=25590)\n\n## Future Considerations\n\n- A referral program is a potential future initiative [00:25](#t=25590)\n\n## Decisions\n\n- Ship the beta build to customers on Friday [00:25](#t=25590) [00:00](#t=640)\n- Keep the current price of $40 per seat for now and revisit pricing in January [00:25](#t=25590)\n\n## Action items\n\n- [ ] update the pricing page before the launch — **Me** [00:06](#t=6800) [00:00](#t=640)\n- [ ] look into a referral program at some point — **Someone (unspecified)** *(suggested, not agreed)* [00:25](#t=25590)\n\n## Open questions\n\n- Whether to offer an annual discount (not yet decided)\n- How to respond to Northwind's feedback that $40 per seat is too high for small teams\n\n## Follow-ups\n\n- Discuss Northwind's feedback on pricing with the team to evaluate potential adjustments\n",
+    "seconds": 16.176356792,
+    "structured": {
+      "action_items": [
+        {
+          "checks": [],
+          "deadline": "",
+          "evidence": [
+            2,
+            4
+          ],
+          "owner": "Me",
+          "task": "update the pricing page before the launch",
+          "type": "commitment",
+          "verified": true
+        },
+        {
+          "checks": [],
+          "deadline": "",
+          "evidence": [
+            3
+          ],
+          "owner": "Someone (unspecified)",
+          "task": "look into a referral program at some point",
+          "type": "suggestion",
+          "verified": true
+        }
+      ],
+      "decisions": [
+        {
+          "evidence": [
+            3,
+            4
+          ],
+          "text": "Ship the beta build to customers on Friday",
+          "verified": true
+        },
+        {
+          "evidence": [
+            3
+          ],
+          "text": "Keep the current price of $40 per seat for now and revisit pricing in January",
+          "verified": true
+        }
+      ],
+      "follow_ups": [
+        "Discuss Northwind's feedback on pricing with the team to evaluate potential adjustments"
+      ],
+      "open_questions": [
+        "Whether to offer an annual discount (not yet decided)",
+        "How to respond to Northwind's feedback that $40 per seat is too high for small teams"
+      ],
+      "sections": [
+        {
+          "heading": "Launch Timeline",
+          "points": [
+            {
+              "evidence": [
+                4
+              ],
+              "text": "Beta build passed QA and will ship on Friday"
+            },
+            {
+              "evidence": [
+                2
+              ],
+              "text": "Me will update the pricing page before launch"
+            }
+          ]
+        },
+        {
+          "heading": "Pricing Strategy",
+          "points": [
+            {
+              "evidence": [
+                3
+              ],
+              "text": "Current price of $40 per seat will be maintained for now"
+            },
+            {
+              "evidence": [
+                5
+              ],
+              "text": "Northwind customer expressed concern that $40 per seat is too high for small teams"
+            },
+            {
+              "evidence": [
+                3
+              ],
+              "text": "Pricing will be reviewed in January"
+            }
+          ]
+        },
+        {
+          "heading": "Future Considerations",
+          "points": [
+            {
+              "evidence": [
+                3
+              ],
+              "text": "A referral program is a potential future initiative"
+            }
+          ]
+        }
+      ],
+      "summary": "The Atlas beta launch is scheduled for Friday, with the team agreeing to ship the build and maintain the $40 per seat price for now. Pricing will be reviewed in January. Northwind has raised concerns about the price being too high for small teams, which remains an open question for future discussion. A referral program is noted as a potential future feature, but no commitment has been made to implement it. Me will update the pricing page ahead of launch.",
+      "title": "Atlas Launch Meeting"
+    },
+    "title": "Atlas Launch Meeting"
+  },
+  "enhanceLong": {
+    "actionItems": [
+      "Write the release notes for the Atlas beta launch",
+      "Update the pricing page before the launch",
+      "Revisit pricing strategy in January",
+      "Investigate a referral program at some point"
+    ],
+    "error": null,
+    "markdown": "## Summary\n\nThe team confirmed the launch of the Atlas beta on Friday, with release notes and pricing page updates to be completed ahead of launch. The current price of $40 per seat is maintained, with a decision to revisit pricing in January. Customer feedback from Northwind indicates concern over the price being too high for small teams, which remains unresolved. A referral program is proposed as a future initiative but no commitment has been made to implement it. The open question of offering an annual discount remains undecided and requires further discussion.\n\n## Launch Timeline\n\n- The beta build passed QA and the team agrees to ship the beta on Friday [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n- Priya will write release notes by Thursday [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n- Me will update the pricing page before launch [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n\n## Pricing Strategy\n\n- Current price of $40 per seat is maintained for now [00:12](#t=12000) [01:12](#t=72000) [02:12](#t=132000)\n- Pricing will be reviewed in January [00:12](#t=12000) [01:12](#t=72000) [02:12](#t=132000)\n- Customer from Northwind expressed concern that $40 per seat is too high for small teams [00:18](#t=18000) [01:18](#t=78000) [02:18](#t=138000)\n\n## Additional Initiatives\n\n- A referral program is suggested for future consideration [00:12](#t=12000) [01:12](#t=72000) [02:12](#t=132000)\n\n## Decisions\n\n- Keep the current price of $40 per seat for now and revisit pricing in January [00:12](#t=12000) [01:12](#t=72000) [02:12](#t=132000)\n- Ship the Atlas beta to customers on Friday [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n- The beta build passed QA yesterday [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n\n## Action items\n\n- [ ] Write the release notes for the Atlas beta launch — **Priya** [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n- [ ] Update the pricing page before the launch — **Me** [00:00](#t=0) [01:00](#t=60000) [02:00](#t=120000)\n- [ ] Revisit pricing strategy in January — **Me** · by January [00:12](#t=12000) [01:12](#t=72000) [02:12](#t=132000)\n- [ ] Investigate a referral program at some point *(suggested, not agreed)* [00:18](#t=18000) [01:18](#t=78000) [02:18](#t=138000)\n\n## Open questions\n\n- Whether to offer an annual discount on Atlas pricing\n- How to respond to customer concerns about the $40 per seat price being too high for small teams\n\n## Follow-ups\n\n- Discuss whether to offer an annual discount for Atlas — this remains an open question and no decision has been made.\n- Address customer feedback from Northwind that $40 per seat is too high for small teams — this has been noted multiple times but not resolved.\n",
+    "seconds": 25.23325575,
+    "segments": 24
+  },
+  "export": {
+    "hasTranscript": true,
+    "markdownBytes": 2404,
+    "wavBytes": 1289946
+  },
+  "finishedAt": "2026-11-19T00:19:36.620508+08:00",
+  "machine": {
+    "appleSilicon": true,
+    "arch": "aarch64",
+    "availableRamGb": 0.0,
+    "chip": "Apple M4 Pro",
+    "cpuCores": 14,
+    "freeDiskGb": 442.414509961,
+    "gpu": "Apple GPU (Metal)",
+    "notes": [],
+    "os": "Darwin",
+    "osVersion": "26.6.2",
+    "supported": true,
+    "totalRamGb": 24.0
+  },
+  "meetingTranscript": {
+    "error": null,
+    "seconds": 1.050880166,
+    "segments": 4,
+    "speakers": [
+      "Them: Thanks for joining everyone, let's review the Atlas launch, the beta build passed QA yesterday. Agreed, let's ship the beta on Friday, Priya will write the release notes by Thursday. One open question is whether we offer an annual discount, we haven't decided that yet",
+      "Me: Great news. I think we should ship the beta to customers on Friday. I'll update the pricing page before the launch",
+      "Me: Maybe someone could look into a referral program at some point Okay, so the decision is we keep $40 for now and revisit pricing in January",
+      "Them: The customer from Northwind said the price of $40 per seat is too high for small teams"
+    ],
+    "wer": 0.6347826086956522
+  },
+  "search": {
+    "firstSnippet": "…ng feedback from «Northwind»",
+    "ftsHits": 10,
+    "semanticChunks": 10,
+    "semanticError": null
+  },
+  "startedAt": "2026-11-19T00:18:00.896361+08:00"
+}
