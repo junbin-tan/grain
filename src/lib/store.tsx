@@ -4,7 +4,7 @@ import { api, on, type CatalogModel, type Hardware, type Meeting, type Settings,
 export type Route =
   | { name: "home" }
   | { name: "meeting"; id: string; tab?: Tab; at?: number }
-  | { name: "chat"; threadId?: string }
+  | { name: "chat"; threadId?: string; ask?: string }
   | { name: "actions" }
   | { name: "models"; role?: "asr" | "llm" | "embed" }
   | { name: "settings"; section?: string };
@@ -41,7 +41,7 @@ type Ctx = {
   refreshCatalog: () => Promise<void>;
   downloads: Record<string, DownloadState>;
   route: Route;
-  navigate: (r: Route) => void;
+  navigate: (r: Route, replace?: boolean) => void;
   back: () => void;
   toasts: Toast[];
   toast: (text: string, kind?: Toast["kind"], action?: Toast["action"]) => void;
@@ -182,7 +182,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const route = history[history.length - 1];
-  const navigate = useCallback((r: Route) => setHistory((h) => [...h.slice(-30), r]), []);
+  const navigate = useCallback((r: Route, replace?: boolean) => setHistory((h) => (replace ? [...h.slice(0, -1), r] : [...h.slice(-30), r])), []);
   const back = useCallback(() => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h)), []);
 
   const startRecording = useCallback(

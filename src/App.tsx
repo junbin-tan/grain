@@ -3,7 +3,8 @@ import { AppProvider, useApp } from "./lib/store";
 import { Sidebar } from "./components/Sidebar";
 import { Toasts } from "./components/Toasts";
 import { SearchPalette } from "./components/SearchPalette";
-import { Spinner } from "./components/ui";
+import { PanelLeft, Search } from "lucide-react";
+import { IconButton, Spinner } from "./components/ui";
 import { Home } from "./pages/Home";
 import { MeetingPage } from "./pages/MeetingPage";
 import { ChatPage } from "./pages/ChatPage";
@@ -13,7 +14,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { Onboarding } from "./pages/Onboarding";
 
 function Shell() {
-  const { ready, route, navigate, back, settings, newMeeting, setSearchOpen } = useApp();
+  const { ready, route, navigate, back, settings, setSetting, newMeeting, setSearchOpen } = useApp();
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
@@ -39,12 +40,17 @@ function Shell() {
   if (!settings.onboardingDone) return <><Onboarding /><Toasts /></>;
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full" data-sidebar={settings.sidebarCollapsed ? "collapsed" : "open"}>
+      {/* Sits beside the traffic lights whether or not the sidebar is shown. */}
+      <div className="no-drag no-print fixed top-3 left-[78px] z-30 flex gap-0.5">
+        <IconButton className="size-7" label={settings.sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => setSetting("sidebarCollapsed", !settings.sidebarCollapsed)}><PanelLeft className="size-4" /></IconButton>
+        <IconButton className="size-7" label="Search (⌘K)" onClick={() => setSearchOpen(true)}><Search className="size-4" /></IconButton>
+      </div>
       <Sidebar />
       <main className="min-w-0 flex-1">
         {route.name === "home" && <Home />}
         {route.name === "meeting" && <MeetingPage key={route.id} id={route.id} tab={route.tab} at={route.at} />}
-        {route.name === "chat" && <ChatPage threadId={route.threadId} />}
+        {route.name === "chat" && <ChatPage threadId={route.threadId} ask={route.ask} />}
         {route.name === "actions" && <ActionsPage />}
         {route.name === "models" && <ModelsPage role={route.role} />}
         {route.name === "settings" && <SettingsPage section={route.section} />}

@@ -31,7 +31,7 @@ function Answer({ text, sources, onSource }: { text: string; sources: Source[]; 
 export const SUGGESTIONS_MEETING = ["What were the decisions?", "List the action items and owners", "Draft a follow-up email", "What questions are still open?"];
 export const SUGGESTIONS_GLOBAL = ["What did we decide yesterday?", "What action items are assigned to me?", "What did customers say about pricing?", "What blockers were raised this week?"];
 
-export function AskPanel({ meetingId, threadId: initialThread, onThread, compact, header }: { meetingId?: string; threadId?: string | null; onThread?: (id: string) => void; compact?: boolean; header?: ReactNode }) {
+export function AskPanel({ meetingId, threadId: initialThread, onThread, compact, header, ask }: { meetingId?: string; threadId?: string | null; onThread?: (id: string) => void; compact?: boolean; header?: ReactNode; ask?: string }) {
   const { navigate, catalog, settings, toast } = useApp();
   const [threadId, setThreadId] = useState<string | null>(initialThread ?? null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -55,6 +55,10 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
   useEffect(() => on<{ threadId: string; token: string }>("chat-token", (e) => {
     if (!threadRef.current || e.threadId === threadRef.current) setStream((s) => s + e.token);
   }), []);
+
+  // A question typed elsewhere (the home Ask bar) is sent once on arrival; the ref survives StrictMode's double effect.
+  const asked = useRef(false);
+  useEffect(() => { if (ask && !asked.current) { asked.current = true; send(ask); } }, []);
 
   useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [messages, stream]);
 

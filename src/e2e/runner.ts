@@ -119,7 +119,7 @@ const nav = async (label: string, ready: () => boolean) => {
 };
 const heading = (t: string) => () => $("h1").some((h) => text(h) === t);
 const main = () => document.querySelector("main") as HTMLElement;
-const meetingAside = () => $("aside").find((a) => findText(/Live transcript|Ask Grain/, a) && a.querySelector("[aria-label='Close panel']")) ?? null;
+const meetingAside = () => $("aside").find((a) => findText(/Live transcript|Ask Grain/, a) && a.querySelector("[aria-label='Close panel'], [aria-label='Minimise transcript']")) ?? null;
 const tab = (name: string) => $("[role=tab]").find((t) => text(t).startsWith(name));
 
 async function phase1() {
@@ -315,7 +315,7 @@ async function phase1() {
 
   // ---------- Ask (meeting panel) ----------
   await step("ask about this meeting (side panel) with sources", async () => {
-    await clickText(/^Ask$/);
+    key("j", { meta: true });
     const aside = await waitFor(meetingAside, "ask panel");
     const t0 = now();
     await clickText("What were the decisions?", aside);

@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowLeft, AudioLines, Captions, RefreshCw, Download, Flag, MessageCircle, Mic, MoreHorizontal, Pause, Play, RotateCcw, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowUp, AudioLines, ChevronDown, ChevronUp, Download, Flag, Mic, MoreHorizontal, Pause, Play, RotateCcw, Trash2, X } from "lucide-react";
 import { confirm } from "../lib/dialogs";
-import { api, on, type MeetingDetail, type Segment, type Template } from "../lib/api";
+import { api, on, type Device, type MeetingDetail, type Segment, type Template } from "../lib/api";
 import { fmtDate, fmtDuration, fmtTime, fmtTs } from "../lib/format";
 import { useApp, type Tab } from "../lib/store";
 import { Editor } from "../components/Editor";
 import { TranscriptView } from "../components/Transcript";
 import { EnhancedView, useEnhance } from "../components/EnhancedView";
-import { AskPanel } from "../components/AskPanel";
+import { AskPanel, SUGGESTIONS_MEETING } from "../components/AskPanel";
 import { ExportDialog } from "../components/ExportDialog";
-import { Badge, Banner, Button, GrainMark, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner } from "../components/ui";
+import { Badge, Banner, Button, GrainMark, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner, Toggle } from "../components/ui";
 
 export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab; at?: number }) {
   const { recording, processing, navigate, back, refreshMeetings, startRecording, settings, catalog, toast } = useApp();
@@ -17,7 +17,10 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
   const [templates, setTemplates] = useState<Template[]>([]);
   const [tab, setTab] = useState<Tab>(initialTab ?? "notes");
   const [jump, setJump] = useState<number | undefined>(at);
-  const [side, setSide] = useState<"none" | "live" | "ask">(() => (window as any).__grainUi?.side ?? "none");
+  const [askOpen, setAskOpen] = useState(() => (window as any).__grainUi?.side === "ask");
+  // A question typed in the dock; the panel sends it once when it opens.
+  const [pendingAsk, setPendingAsk] = useState<string | undefined>();
+  const [liveOpen, setLiveOpen] = useState(() => (window as any).__grainUi?.side === "live");
   const [exportOpen, setExportOpen] = useState<boolean>(() => !!(window as any).__grainUi?.export);
   const [starting, setStarting] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
@@ -54,6 +57,10 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
   const enhance = { ...enhanceHook, run: (templateId?: string) => { setTab("enhanced"); return enhanceHook.run(templateId); } };
   const isRecording = recording?.meetingId === id;
   const busy = processing[id];
+  useEffect(() => { if (!askOpen) setPendingAsk(undefined); }, [askOpen]);
+  // Fold the transcript away when recording stops so Enhance and the notes are in view.
+  const wasRecording = useRef(isRecording);
+  useEffect(() => { if (wasRecording.current && !isRecording) setLiveOpen(false); wasRecording.current = isRecording; }, [isRecording]);
 
   useEffect(() => {
     const offs = [
@@ -63,7 +70,7 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
       }),
       on<any>("meeting-status", (e) => { if (e.meetingId === id) load(); }),
       on<any>("transcription-status", (e) => { if (e.meetingId === id && (e.state === "done" || e.state === "error")) load(); }),
-      on<any>("capture", (e) => { if (e.meetingId === id && e.event === "started") { load(); setSide((s) => (s === "none" && settings.transcriptionMode !== "after" ? "live" : s)); } }),
+      on<any>("capture", (e) => { if (e.meetingId === id && e.event === "started") { load(); if (settings.transcriptionMode !== "after") setLiveOpen(true); } }),
     ];
     return () => offs.forEach((f) => f());
   }, [id, settings.transcriptionMode]);
@@ -75,7 +82,7 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
       if (e.key === "1") { e.preventDefault(); setTab("notes"); }
       if (e.key === "2") { e.preventDefault(); setTab("enhanced"); }
       if (e.key === "3") { e.preventDefault(); setTab("transcript"); }
-      if (e.key === "j") { e.preventDefault(); setSide((s) => (s === "ask" ? "none" : "ask")); }
+      if (e.key === "j") { e.preventDefault(); setAskOpen((o) => !o); }
       if (e.key === "e" && !isRecording) { e.preventDefault(); enhance.run(); }
       if (e.key === "r") { e.preventDefault(); if (isRecording) api.stopRecording(); else record(); }
       if (e.key === "m" && isRecording) { e.preventDefault(); mark(); }
@@ -133,12 +140,11 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
   return (
     <div className="flex h-full min-w-0">
       <div className="relative flex min-w-0 flex-1 flex-col">
-        <header className="drag no-print flex h-[52px] shrink-0 items-center gap-1 px-3">
+        <header className="drag no-print flex h-[52px] shrink-0 items-center gap-1 px-3 in-data-[sidebar=collapsed]:pl-[148px]">
           <IconButton className="no-drag" label="Back" onClick={back}><ArrowLeft className="size-4" /></IconButton>
           <div className="truncate px-1 text-[12.5px] text-ink-subtle">Meetings / <span className="text-ink-muted">{m.title || "Untitled meeting"}</span></div>
           <div className="flex-1" />
           <div className="no-drag flex items-center gap-1">
-            <Button size="sm" variant="ghost" onClick={() => setSide((s) => (s === "ask" ? "none" : "ask"))}><MessageCircle className="size-3.5" />Ask</Button>
             <Button size="sm" variant="ghost" onClick={() => setExportOpen(true)}><Download className="size-3.5" />Export</Button>
             <Menu trigger={(t) => <IconButton label="More" onClick={t}><MoreHorizontal className="size-4" /></IconButton>}>
               {(close) => (
@@ -209,26 +215,20 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
           </div>
         </div>
 
-        <Dock {...{ isRecording, neverRecorded, starting, record, mark, enhance, side, setSide, hasInput: detail.segments.length > 0 || !!detail.manual?.content.trim(), hasEnhanced: !!detail.enhanced, busy, setTab, onEnhancedTab: tab === "enhanced" }} />
+        <Dock {...{ isRecording, neverRecorded, starting, record, mark, enhance, busy, liveOpen, setLiveOpen,
+          hasInput: detail.segments.length > 0 || !!detail.manual?.content.trim(), hasEnhanced: !!detail.enhanced,
+          askOpen, onAsk: (q: string) => { setPendingAsk(q); setAskOpen(true); },
+          transcript: <TranscriptView segments={detail.segments} marks={detail.marks} live={isRecording} onChanged={() => {}} /> }} />
       </div>
 
-      {side !== "none" && (
+      {askOpen && (
         <aside className="no-print flex w-[360px] shrink-0 animate-fade flex-col border-l border-line bg-paper">
-          <div className="drag flex h-[52px] shrink-0 items-center gap-1 px-3">
-            <div className="no-drag flex gap-1">
-              <Button size="sm" variant={side === "live" ? "secondary" : "ghost"} onClick={() => setSide("live")}>Live transcript</Button>
-              <Button size="sm" variant={side === "ask" ? "secondary" : "ghost"} onClick={() => setSide("ask")}>Ask Grain</Button>
-            </div>
+          <div className="drag flex h-[52px] shrink-0 items-center gap-1 px-4">
+            <div className="label text-ink-muted">Ask Grain</div>
             <div className="flex-1" />
-            <IconButton className="no-drag" label="Close panel" onClick={() => setSide("none")}><X className="size-4" /></IconButton>
+            <IconButton className="no-drag" label="Close panel" onClick={() => setAskOpen(false)}><X className="size-4" /></IconButton>
           </div>
-          {side === "live" ? (
-            <div className="scroll-y flex-1 px-4 pb-6">
-              <TranscriptView segments={detail.segments} marks={detail.marks} live={isRecording} onChanged={() => {}} />
-            </div>
-          ) : (
-            <AskPanel meetingId={id} compact />
-          )}
+          <AskPanel meetingId={id} compact ask={pendingAsk} />
         </aside>
       )}
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} meetingId={id} title={m.title} hasAudio={hasAudio} />
@@ -236,59 +236,97 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
   );
 }
 
-function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, side, setSide, hasInput, hasEnhanced, busy, setTab, onEnhancedTab }: any) {
+// The dock, left to right: the recorder (opens the live transcript), then Ask. One status or action floats above.
+function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, busy, liveOpen, setLiveOpen, hasInput, hasEnhanced, askOpen, onAsk, transcript }: any) {
   const { recording, settings, setSetting } = useApp();
-  const r = recording;
+  const r = isRecording ? recording : null;
+  const [q, setQ] = useState("");
+  const [devices, setDevices] = useState<Device[]>([]);
+  useEffect(() => { if (liveOpen) api.devices().then(setDevices).catch(() => {}); }, [liveOpen]);
+  const ask = (text: string) => { if (!text.trim()) return; onAsk(text.trim()); setQ(""); };
+  const pill = "flex animate-rise items-center rounded-full border border-line bg-paper-raised shadow-[var(--shadow-raised)]";
+  const chevron = (
+    <IconButton className="size-7" label={liveOpen ? "Hide transcript" : "Show transcript"} aria-expanded={liveOpen} onClick={() => setLiveOpen(!liveOpen)}>
+      {liveOpen ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+    </IconButton>
+  );
+
   return (
-    <div className="no-print pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
-      <div className="pointer-events-auto flex flex-col items-center gap-2">
-        {isRecording && r ? (
-          <div className={`gr-rec animate-rise ${r.paused ? "gr-rec--paused" : ""}`} role="status" aria-label="Recording controls">
-            <span className="gr-rec__dot" />
-            <span className="w-[66px]">{r.paused ? "Paused" : "Recording"}</span>
-            <span className="gr-rec__time w-[44px]">{fmtTs(r.elapsed * 1000)}</span>
-            <span className={`flex items-center gap-1 ${r.micOn ? "text-speaker-me" : "text-ink-subtle"}`} title={r.micOn ? `Me: ${r.micDevice}` : "Microphone off"}>
-              <Mic className="size-3.5" /><LevelBars level={r.mic} active={r.micOn && !r.paused} />
-            </span>
-            <span className={`flex items-center gap-1 ${r.systemOn ? "text-speaker-them" : "text-ink-subtle"}`} title={r.systemOn ? "Them: computer audio" : "Computer audio off"}>
-              <AudioLines className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
-            </span>
-            <div className="h-5 w-px bg-line" />
-            <div className="flex">
-              <IconButton label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-4" /></IconButton>
-              <IconButton label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-4" /> : <Pause className="size-4" />}</IconButton>
-              <IconButton label="Live transcript" active={side === "live"} onClick={() => setSide(side === "live" ? "none" : "live")}><Captions className="size-4" /></IconButton>
+    <div className="no-print pointer-events-none absolute inset-x-0 bottom-5 flex justify-center px-6">
+      <div className="pointer-events-auto flex w-full max-w-[680px] flex-col items-center gap-2">
+        {liveOpen && (
+          <aside aria-label="Live transcript" className="flex h-[min(380px,50vh)] w-full animate-rise flex-col overflow-hidden rounded-xl border border-line bg-paper-raised shadow-[var(--shadow-raised)]">
+            <div className="flex h-10 shrink-0 items-center gap-2 border-b border-line px-4">
+              <div className="label text-ink-muted">{r ? "Live transcript" : "Transcript"}</div>
+              {r && <span className="timestamp text-ink-subtle">{fmtTs(r.elapsed * 1000)}</span>}
+              <div className="flex-1" />
+              <IconButton className="size-7" label="Minimise transcript" onClick={() => setLiveOpen(false)}><ChevronDown className="size-4" /></IconButton>
             </div>
-            <button className="gr-rec__stop" aria-label="Stop recording (⌘R)" title="Stop recording (⌘R)" onClick={() => api.stopRecording()} />
-          </div>
-        ) : enhance.stage ? (
-          <div className="flex h-11 animate-rise items-center gap-2 rounded-full border border-line bg-paper-raised px-4 text-[13px] text-ink-muted shadow-[var(--shadow-raised)]">
-            <GrainMark className="size-4" /> Enhancing notes on this Mac…
-          </div>
-        ) : neverRecorded ? (
-          <>
-            <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-paper-raised p-1.5 pl-2 shadow-[var(--shadow-raised)]">
-              <button onClick={() => setSetting("captureSystem", settings.captureSystem === false)} title="Include computer audio (the other people on your call)"
-                className={`flex h-8 items-center gap-1.5 rounded-md px-3 text-[12.5px] ${settings.captureSystem !== false ? "bg-paper-sunken text-ink" : "text-ink-subtle line-through"}`}>
-                <AudioLines className="size-3.5" />Computer audio
-              </button>
-              <span className={`flex h-8 items-center gap-1.5 px-2 text-[12.5px] ${settings.micDevice === "none" ? "text-ink-subtle line-through" : "text-ink-muted"}`} title={settings.micDevice === "none" ? "Microphone is off (Settings › Audio)" : "Microphone"}><Mic className="size-3.5" />Mic</span>
-              <RecordButton loading={starting} onClick={record}>Start recording <span className="opacity-60">⌘R</span></RecordButton>
+            <div className="scroll-y flex-1 px-4 pb-4">{transcript}</div>
+            <div className="flex h-11 shrink-0 items-center gap-2 border-t border-line px-3 text-[12.5px] text-ink-muted">
+              {r ? (
+                <>
+                  <IconButton className="size-7" label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-3.5" /></IconButton>
+                  <IconButton className="size-7" label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}</IconButton>
+                  <span className={`flex items-center gap-1 ${r.systemOn ? "text-speaker-them" : "text-ink-subtle"}`} title={r.systemOn ? "Them: computer audio" : "Computer audio off"}>
+                    <AudioLines className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
+                  </span>
+                </>
+              ) : (
+                <label className="flex items-center gap-2" title="The other people on your call">
+                  <AudioLines className="size-3.5" />Computer audio
+                  <Toggle label="Computer audio" checked={settings.captureSystem !== false} onChange={(v) => setSetting("captureSystem", v)} />
+                </label>
+              )}
+              <div className="flex-1" />
+              <Mic className="size-3.5 shrink-0" />
+              <select aria-label="Microphone" value={settings.micDevice ?? "default"}
+                onChange={(e) => { const v = e.target.value; setSetting("micDevice", v === "default" ? null : v); if (r && v !== "none") api.switchMic(v).catch(() => {}); }}
+                className="bare h-7 max-w-[220px] truncate rounded-sm bg-transparent px-1.5 text-[12.5px] text-ink-muted outline-none hover:bg-paper-sunken">
+                <option value="default">System default</option>
+                <option value="none">Off (computer audio only)</option>
+                {devices.map((d) => <option key={d.uid} value={d.uid}>{d.name}</option>)}
+              </select>
             </div>
-            <div className="text-[11.5px] text-ink-subtle">Tell everyone you're recording. Consent rules vary by place. Audio stays on this Mac.</div>
-          </>
-        ) : (
-          <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-paper-raised p-1.5 shadow-[var(--shadow-raised)]">
-            <RecordButton variant="ghost" onClick={record} disabled={!!busy}>Resume recording</RecordButton>
-            {hasEnhanced && onEnhancedTab ? (
-              <Button variant="accent" disabled={!!busy} onClick={() => enhance.run()}><RefreshCw />Regenerate</Button>
-            ) : (
-              <Button variant={hasEnhanced ? "primary" : "accent"} disabled={!hasInput || !!busy} onClick={() => (hasEnhanced ? setTab("enhanced") : enhance.run())}>
-                {!hasEnhanced && <GrainMark mono />}{hasEnhanced ? "View enhanced notes" : "Enhance notes"} {!hasEnhanced && <Kbd>⌘E</Kbd>}
-              </Button>
-            )}
-          </div>
+          </aside>
         )}
+        {r || neverRecorded ? (
+          !liveOpen && <div className="rounded-full border border-line bg-paper-raised px-3 py-1 text-[11.5px] text-ink-subtle">Tell everyone you're recording. Consent rules vary by place. Audio stays on this Mac.</div>
+        ) : enhance.stage ? (
+          <div className={`${pill} h-9 gap-2 px-4 text-[13px] text-ink-muted`}><GrainMark className="size-4" /> Enhancing notes on this Mac…</div>
+        ) : !hasEnhanced && (
+          <Button variant="accent" className="rounded-full" disabled={!hasInput || !!busy} onClick={() => enhance.run()}>
+            <GrainMark mono />Enhance notes <Kbd>⌘E</Kbd>
+          </Button>
+        )}
+
+        <div className="flex w-full items-center gap-2">
+          {r ? (
+            <div className={`gr-rec animate-rise ${r.paused ? "gr-rec--paused" : ""}`} role="status" aria-label="Recording controls">
+              <span className="gr-rec__dot" />
+              <span className="gr-rec__time w-[44px]">{fmtTs(r.elapsed * 1000)}</span>
+              <span className={r.micOn ? "" : "opacity-40"} title={r.micOn ? `Me: ${r.micDevice}` : "Microphone off"}><LevelBars level={r.mic} active={r.micOn && !r.paused} /></span>
+              {chevron}
+              <button className="gr-rec__stop" aria-label="Stop recording (⌘R)" title="Stop recording (⌘R)" onClick={() => api.stopRecording()} />
+            </div>
+          ) : (
+            <div className={`${pill} h-11 gap-1 pr-1.5 pl-2`}>
+              {chevron}
+              <RecordButton variant={neverRecorded ? "primary" : "ghost"} size="sm" loading={starting} disabled={!!busy} onClick={record}>{neverRecorded ? "Start recording" : "Resume"}</RecordButton>
+            </div>
+          )}
+          {!askOpen && (
+            <form onSubmit={(e) => { e.preventDefault(); ask(q); }} className={`${pill} h-11 min-w-0 flex-1 gap-2 pr-1.5 pl-4 focus-within:border-ink-muted`}>
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ask anything" aria-label="Ask about this meeting"
+                className="h-full min-w-0 flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-ink-subtle" />
+              {q.trim() ? (
+                <button type="submit" aria-label="Ask" className="grid size-8 place-items-center rounded-full bg-ink text-paper hover:bg-ink-muted"><ArrowUp className="size-4" /></button>
+              ) : (
+                <button type="button" onClick={() => ask(SUGGESTIONS_MEETING[2])} className="h-8 shrink-0 truncate rounded-full border border-line px-3 text-[12.5px] text-ink-muted hover:bg-paper-sunken hover:text-ink">{SUGGESTIONS_MEETING[2]}</button>
+              )}
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

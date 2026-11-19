@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, FileText, Mic, MoreHorizontal, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowUp, FileText, Mic, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { useApp } from "../lib/store";
 import { api, type Meeting } from "../lib/api";
 import { dayLabel, fmtDuration, fmtTime } from "../lib/format";
-import { Badge, Banner, Button, EmptyState, IconButton, Kbd, Menu, MenuItem, RecDot, RecordButton } from "../components/ui";
+import { Badge, Banner, Button, EmptyState, IconButton, Menu, MenuItem, RecDot, RecordButton } from "../components/ui";
 import { confirm } from "../lib/dialogs";
 
 function StatusBadge({ m, processing }: { m: Meeting; processing?: string }) {
@@ -15,18 +15,16 @@ function StatusBadge({ m, processing }: { m: Meeting; processing?: string }) {
 }
 
 export function Home() {
-  const { meetings, navigate, newMeeting, processing, refreshMeetings, setSearchOpen, settings, catalog, toast } = useApp();
-  const [filter, setFilter] = useState("");
+  const { meetings, navigate, newMeeting, processing, refreshMeetings, settings, catalog, toast } = useApp();
+  const [ask, setAsk] = useState("");
   const groups = useMemo(() => {
-    const q = filter.trim().toLowerCase();
-    const list = meetings.filter(({ meeting, preview }) => !q || meeting.title.toLowerCase().includes(q) || preview.toLowerCase().includes(q));
-    const g = new Map<string, typeof list>();
-    for (const item of list) {
+    const g = new Map<string, typeof meetings>();
+    for (const item of meetings) {
       const k = dayLabel(item.meeting.startedAt ?? item.meeting.createdAt);
       g.set(k, [...(g.get(k) ?? []), item]);
     }
     return [...g.entries()];
-  }, [meetings, filter]);
+  }, [meetings]);
 
   const asrReady = catalog.some((c) => c.id === settings.asrModel && c.status === "ready");
   const llmReady = catalog.some((c) => c.id === settings.llmModel && c.status === "ready");
@@ -42,13 +40,9 @@ export function Home() {
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
       <header className="drag flex h-[52px] shrink-0 items-center justify-end gap-2 px-5">
-        <div className="no-drag relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle" />
-          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter meetings"
-            className="h-8 w-[220px] rounded-md border border-line bg-paper-raised pr-2 pl-8 text-[13px] outline-none placeholder:text-ink-subtle focus:border-line-strong" />
-        </div>
+        <Button size="sm" className="no-drag" onClick={() => newMeeting(false)} title="New note (⌘N)"><Plus className="size-3.5" />New note</Button>
       </header>
       <div className="scroll-y flex-1">
         <div className="mx-auto w-full max-w-[760px] px-8 pb-24">
@@ -77,8 +71,6 @@ export function Home() {
               body="Start a meeting to record and take notes. When it ends, Grain turns your notes and the transcript into clean meeting notes, all on this Mac.">
               <Button onClick={() => newMeeting(false)}>New note without recording</Button>
             </EmptyState>
-          ) : groups.length === 0 ? (
-            <div className="py-12 text-center text-[13px] text-ink-muted">No meetings match "{filter}". <button className="underline" onClick={() => setSearchOpen(true)}>Search everything</button> <Kbd>⌘K</Kbd></div>
           ) : (
             groups.map(([label, items]) => (
               <section key={label} className="mt-7">
@@ -108,6 +100,12 @@ export function Home() {
           )}
         </div>
       </div>
+      <form onSubmit={(e) => { e.preventDefault(); if (ask.trim()) navigate({ name: "chat", ask: ask.trim() }); }}
+        className="absolute inset-x-0 bottom-4 mx-auto flex h-11 w-[min(640px,calc(100%-48px))] items-center gap-2 rounded-full border border-line-strong bg-paper-raised pr-1.5 pl-4 shadow-[var(--shadow-raised)] focus-within:border-ink-muted">
+        <input value={ask} onChange={(e) => setAsk(e.target.value)} placeholder="Ask anything" aria-label="Ask anything about your meetings"
+          className="h-full flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-ink-subtle" />
+        <button type="submit" aria-label="Ask" disabled={!ask.trim()} className="grid size-8 place-items-center rounded-full bg-ink text-paper hover:bg-ink-muted disabled:bg-line-strong"><ArrowUp className="size-4" /></button>
+      </form>
     </div>
   );
 }

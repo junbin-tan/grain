@@ -52,8 +52,8 @@ export function SearchPalette() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade justify-center bg-ink/20 pt-[11vh]" onMouseDown={(e) => e.target === e.currentTarget && setSearchOpen(false)}>
-      <div className="flex h-fit max-h-[70vh] w-[640px] animate-rise flex-col overflow-hidden rounded-lg border border-line bg-paper-raised shadow-[var(--shadow-raised)]"
+    <div className="fixed inset-0 z-50 flex animate-fade justify-center bg-ink/10 pt-[11vh]" onMouseDown={(e) => e.target === e.currentTarget && setSearchOpen(false)}>
+      <div className="flex h-fit max-h-[70vh] w-[640px] animate-rise flex-col overflow-hidden rounded-xl border border-line bg-paper-raised/75 shadow-[var(--shadow-raised)] backdrop-blur-2xl backdrop-saturate-150"
         onKeyDown={(e) => {
           if (e.key === "Escape") setSearchOpen(false);
           if (e.key === "ArrowDown") { e.preventDefault(); setSel((s) => Math.min(flat.length - 1, s + 1)); }
