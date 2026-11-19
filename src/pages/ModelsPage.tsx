@@ -19,21 +19,21 @@ const ROLES: { id: Role; label: string; blurb: string; setting: string }[] = [
   { id: "embed", label: "Search by meaning", blurb: "Optional. An embedding model lets search and Ask Grain find related passages, not just exact words.", setting: "embedModel" },
 ];
 
-const GRADE_TONE: Record<string, string> = { A: "bg-accent-soft text-accent-ink", B: "bg-accent-soft text-accent-ink", C: "bg-warn-soft text-warn-ink", D: "bg-warn-soft text-warn-ink", F: "bg-rec-soft text-rec-ink" };
+const GRADE_TONE: Record<string, string> = { A: "bg-sprout-tint text-sprout", B: "bg-sprout-tint text-sprout", C: "bg-paper-sunken text-ink-muted", D: "bg-paper-sunken text-ink-muted", F: "bg-clay-tint text-clay" };
 
 function Grade({ m, lang }: { m: CatalogModel; lang: string }) {
   const err = m.accuracy[lang];
   const g = grade(err);
-  if (!g) return <span className="text-[12px] text-ink-3" title="No published benchmark for this language">–</span>;
-  return <span title={`${err.toFixed(1)}% error on FLEURS (${langName(lang)}), published by transcribe.cpp`} className={`inline-grid h-5 w-6 place-items-center rounded-[5px] text-[11.5px] font-semibold ${GRADE_TONE[g]}`}>{g}</span>;
+  if (!g) return <span className="text-[12px] text-ink-subtle" title="No published benchmark for this language">–</span>;
+  return <span title={`${err.toFixed(1)}% error on FLEURS (${langName(lang)}), published by transcribe.cpp`} className={`inline-grid h-5 w-6 place-items-center rounded-sm text-[11.5px] font-semibold ${GRADE_TONE[g]}`}>{g}</span>;
 }
 
 function Speed({ m }: { m: CatalogModel }) {
   const l = speedLevel(m.speed);
-  if (!l) return <span className="text-[12px] text-ink-3">–</span>;
+  if (!l) return <span className="text-[12px] text-ink-subtle">–</span>;
   return (
     <span className="flex gap-[3px]" title={`${m.speed?.toFixed(1)}× real-time on the published reference machine (not measured on this Mac)`}>
-      {[1, 2, 3, 4].map((i) => <span key={i} className={`size-[6px] rounded-full ${i <= l ? "bg-ink-2" : "bg-line-strong"}`} />)}
+      {[1, 2, 3, 4].map((i) => <span key={i} className={`size-[6px] rounded-full ${i <= l ? "bg-ink-muted" : "bg-line-strong"}`} />)}
     </span>
   );
 }
@@ -64,41 +64,41 @@ function Row({ m, active, recommended, reason, lang, ramGb, langs }: { m: Catalo
 
   return (
     <div role="button" tabIndex={0} aria-pressed={active} onClick={use} onKeyDown={(e) => e.key === "Enter" && use()}
-      className={`group grid grid-cols-[22px_1fr_44px_54px_72px_120px] items-center gap-3 border-b border-line px-3 py-2.5 last:border-0 ${installed && !active ? "cursor-pointer hover:bg-paper" : ""} ${active ? "bg-accent-soft/40" : ""}`}>
-      <span className={`grid size-[18px] place-items-center rounded-full border ${active ? "border-accent bg-accent text-white" : installed ? "border-line-strong" : "border-transparent"}`}>
+      className={`group grid grid-cols-[22px_1fr_44px_54px_72px_120px] items-center gap-3 border-b border-line px-3 py-2.5 last:border-0 ${installed && !active ? "cursor-pointer hover:bg-paper" : ""} ${active ? "bg-paper-sunken" : ""}`}>
+      <span className={`grid size-[18px] place-items-center rounded-full border ${active ? "border-ink bg-ink text-paper" : installed ? "border-line-strong" : "border-transparent"}`}>
         {active && <Check className="size-3" />}
-        {!installed && !downloading && <Download className="size-3.5 text-ink-3" />}
+        {!installed && !downloading && <Download className="size-3.5 text-ink-subtle" />}
       </span>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-[13.5px] font-medium text-ink">{m.name}</span>
-          {recommended && <Badge tone="accent">Recommended</Badge>}
+          {recommended && <Badge>Recommended</Badge>}
           {caps.streaming && <Badge>Streaming</Badge>}
           {caps.translate && <Badge>Translate</Badge>}
           {m.role === "llm" && m.thinking && <Badge>Thinking off</Badge>}
           {m.custom && <Badge>{m.origin?.source && m.origin.source !== "A file you added" ? `From ${m.origin.source}` : "Imported"}</Badge>}
-          {!installed && m.found && <Badge tone="accent" className="!gap-1"><Laptop className="size-3" />On this Mac · {m.found.source}</Badge>}
+          {!installed && m.found && <Badge className="!gap-1"><Laptop className="size-3" />On this Mac · {m.found.source}</Badge>}
           {installed && m.installedQuant && m.quants.length > 1 && <Badge>{m.installedQuant}</Badge>}
-          {!m.curated && <Badge tone="warn">Experimental</Badge>}
-          {tight && <Badge tone="warn" className="!gap-1"><AlertTriangle className="size-3" />Needs ~{m.minRamGb} GB RAM</Badge>}
-          {m.status === "missing" && <Badge tone="rec">File missing</Badge>}
+          {!m.curated && <Badge tone="clay">Experimental</Badge>}
+          {tight && <Badge tone="clay" className="!gap-1"><AlertTriangle className="size-3" />Needs ~{m.minRamGb} GB RAM</Badge>}
+          {m.status === "missing" && <Badge tone="clay">File missing</Badge>}
         </div>
-        <div className="mt-0.5 truncate text-[12px] text-ink-2">{reason ?? m.description}</div>
-        {installed && m.origin && !m.custom && <div className="mt-0.5 text-[11.5px] text-ink-3">From {m.origin.source} · {m.origin.how === "clone" ? "shared copy, no extra disk space" : m.origin.how === "reference" ? "used where it is" : "copied"}</div>}
-        {missingLangs.length > 0 && <div className="mt-0.5 text-[11.5px] text-warn">Doesn't support {missingLangs.map(langName).join(", ")}</div>}
+        <div className="mt-0.5 truncate text-[12px] text-ink-muted">{reason ?? m.description}</div>
+        {installed && m.origin && !m.custom && <div className="mt-0.5 text-[11.5px] text-ink-subtle">From {m.origin.source} · {m.origin.how === "clone" ? "shared copy, no extra disk space" : m.origin.how === "reference" ? "used where it is" : "copied"}</div>}
+        {missingLangs.length > 0 && <div className="mt-0.5 text-[11.5px] text-clay">Doesn't support {missingLangs.map(langName).join(", ")}</div>}
         {m.role === "asr" && !m.custom && (
-          <div className="mt-0.5 truncate text-[11.5px] text-ink-3" title={m.languages.map(langName).join(", ")}>
+          <div className="mt-0.5 truncate text-[11.5px] text-ink-subtle" title={m.languages.map(langName).join(", ")}>
             {m.languages.length > 6 ? `${m.languages.length} languages: ${m.languages.slice(0, 6).map(langName).join(", ")}…` : m.languages.map(langName).join(", ")} · {m.params} · {m.license}
           </div>
         )}
-        {m.role !== "asr" && !m.custom && <div className="mt-0.5 text-[11.5px] text-ink-3">{m.params} · {m.quant} · {m.license} · {m.repo}</div>}
-        {m.custom && <div className="mt-0.5 truncate text-[11.5px] text-ink-3">{m.filename}{m.quant && ` · ${m.quant}`}</div>}
+        {m.role !== "asr" && !m.custom && <div className="mt-0.5 text-[11.5px] text-ink-subtle">{m.params} · {m.quant} · {m.license} · {m.repo}</div>}
+        {m.custom && <div className="mt-0.5 truncate text-[11.5px] text-ink-subtle">{m.filename}{m.quant && ` · ${m.quant}`}</div>}
         {!installed && !downloading && m.quants.length > 1 && (
           <div className="mt-1.5 flex flex-wrap items-center gap-1" onClick={(e) => e.stopPropagation()}>
-            <span className="mr-0.5 text-[11.5px] text-ink-3">Size:</span>
+            <span className="mr-0.5 text-[11.5px] text-ink-subtle">Size:</span>
             {[...m.quants].sort((a, b) => a.size - b.size).map((q) => (
               <button key={q.quant} onClick={() => setQuant(q.quant)} title={`${q.quant}: ${QUANT_HINT[q.quant] ?? ""}. Smaller files use less memory and can be slightly less accurate.`}
-                className={`h-5 rounded-full px-2 text-[11px] whitespace-nowrap tabular-nums ${quant === q.quant ? "bg-ink text-white" : "bg-wash text-ink-2 hover:bg-line"}`}>
+                className={`h-5 rounded-sm px-2 text-[11px] whitespace-nowrap tabular-nums ${quant === q.quant ? "bg-ink text-paper" : "bg-paper-sunken text-ink-muted hover:bg-line"}`}>
                 {q.quant} · {fmtBytes(q.size)}
               </button>
             ))}
@@ -107,17 +107,17 @@ function Row({ m, active, recommended, reason, lang, ramGb, langs }: { m: Catalo
         {downloading && (
           <div className="mt-1.5 flex items-center gap-2">
             <Progress value={pct} className="w-[220px]" />
-            <span className="text-[11.5px] text-ink-3 tabular-nums">
+            <span className="text-[11.5px] text-ink-subtle tabular-nums">
               {d?.state === "verifying" ? "Verifying…" : `${Math.round(pct * 100)}% of ${fmtBytes(d?.total ?? size)}${d?.bytesPerSec ? ` · ${fmtBytes(d.bytesPerSec)}/s` : ""}`}
             </span>
           </div>
         )}
-        {!downloading && !installed && m.partialBytes > 0 && <div className="mt-1 text-[11.5px] text-ink-3">Paused at {Math.round((m.partialBytes / size) * 100)}%{m.partialQuant && ` (${m.partialQuant})`}. Download resumes where it stopped.</div>}
-        {d?.state === "failed" && <div className="mt-1 text-[11.5px] text-rec">{d.error}</div>}
+        {!downloading && !installed && m.partialBytes > 0 && <div className="mt-1 text-[11.5px] text-ink-subtle">Paused at {Math.round((m.partialBytes / size) * 100)}%{m.partialQuant && ` (${m.partialQuant})`}. Download resumes where it stopped.</div>}
+        {d?.state === "failed" && <div className="mt-1 text-[11.5px] text-clay">{d.error}</div>}
       </div>
       <span>{m.role === "asr" && <Grade m={m} lang={lang} />}</span>
       <span>{m.role === "asr" && <Speed m={m} />}</span>
-      <span className="text-right text-[12px] text-ink-2 tabular-nums">{fmtBytes(size)}</span>
+      <span className="text-right text-[12px] text-ink-muted tabular-nums">{fmtBytes(size)}</span>
       <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>
         {asking ? (
           <>
@@ -156,9 +156,9 @@ function Table({ title, models, ...rest }: { title: string; models: CatalogModel
   return (
     <section className="mt-6">
       <div className="mb-1.5 flex items-center justify-between px-1">
-        <h2 className="text-[12.5px] font-semibold text-ink-2">{title}</h2>
+        <h2 className="text-[12.5px] font-semibold text-ink-muted">{title}</h2>
       </div>
-      <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-raised">
+      <div className="overflow-hidden rounded-lg border border-line bg-paper-raised">
         {models.map((m) => (
           <Row key={m.id} m={m} active={m.id === rest.activeId} recommended={!!rest.rec && (rest.rec.asr[0] === m.id || rest.rec.llm === m.id || rest.rec.embed === m.id)}
             reason={rest.rec?.reasons[m.id]} lang={rest.lang} ramGb={rest.ramGb} langs={rest.langs} />
@@ -175,16 +175,16 @@ function OthersTable({ others, onUsed }: { others: FoundModel[]; onUsed: () => v
   if (!others.length) return null;
   return (
     <section className="mt-6">
-      <h2 className="mb-1.5 px-1 text-[12.5px] font-semibold text-ink-2">Other models found on this Mac</h2>
-      <div className="overflow-hidden rounded-[var(--radius-card)] border border-line bg-raised">
+      <h2 className="mb-1.5 px-1 text-[12.5px] font-semibold text-ink-muted">Other models found on this Mac</h2>
+      <div className="overflow-hidden rounded-lg border border-line bg-paper-raised">
         {others.map((o) => (
           <div key={o.path} className="flex items-center gap-3 border-b border-line px-3 py-2.5 last:border-0">
-            <Laptop className="size-4 shrink-0 text-ink-3" />
+            <Laptop className="size-4 shrink-0 text-ink-subtle" />
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5"><span className="text-[13.5px] font-medium">{o.name ?? o.path.split("/").pop()}</span><Badge tone="accent">{o.source}</Badge>{o.arch && <Badge>{o.arch}</Badge>}</div>
-              <div className="mt-0.5 truncate text-[11.5px] text-ink-3" title={o.path}>{o.path.split("/").pop()} · not tested with Grain; checked when first used</div>
+              <div className="flex flex-wrap items-center gap-1.5"><span className="text-[13.5px] font-medium">{o.name ?? o.path.split("/").pop()}</span><Badge>{o.source}</Badge>{o.arch && <Badge>{o.arch}</Badge>}</div>
+              <div className="mt-0.5 truncate text-[11.5px] text-ink-subtle" title={o.path}>{o.path.split("/").pop()} · not tested with Grain; checked when first used</div>
             </div>
-            <span className="text-[12px] text-ink-2 tabular-nums">{fmtBytes(o.size)}</span>
+            <span className="text-[12px] text-ink-muted tabular-nums">{fmtBytes(o.size)}</span>
             <Button size="sm" loading={busy === o.path} onClick={async () => {
               setBusy(o.path);
               try { await api.useFoundModel(o.role!, o.path, o.source); await refreshCatalog(); onUsed(); toast(`Using ${o.name ?? "the model"} from ${o.source}`, "success"); } catch (e) { toast(String(e), "error"); } finally { setBusy(null); }
@@ -262,28 +262,28 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
       <div className="drag h-[52px] shrink-0" />
       <div className="scroll-y flex-1">
         <div className="mx-auto max-w-[860px] px-8 pb-20">
-          <h1 className="font-serif text-[30px] font-semibold">Models</h1>
-          <p className="mt-1 text-[13px] text-ink-2">Everything runs on this Mac. Models are downloaded once from Hugging Face, checked against a SHA-256 hash, and then work offline.</p>
+          <h1 className="title">Models</h1>
+          <p className="mt-1 text-[13px] text-ink-muted">Everything runs on this Mac. Models are downloaded once from Hugging Face, checked against a SHA-256 hash, and then work offline.</p>
 
           <div className="mt-5 flex items-center gap-1 border-b border-line">
             {ROLES.map((r) => (
-              <button key={r.id} onClick={() => setRole(r.id)} className={`relative h-9 px-3 text-[13px] font-medium ${role === r.id ? "text-ink" : "text-ink-3 hover:text-ink-2"}`}>
+              <button key={r.id} onClick={() => setRole(r.id)} className={`relative h-9 px-3 text-[13px] font-medium ${role === r.id ? "text-ink" : "text-ink-subtle hover:text-ink-muted"}`}>
                 {r.label}{role === r.id && <span className="absolute inset-x-2 -bottom-px h-[2px] rounded-full bg-ink" />}
               </button>
             ))}
           </div>
-          <p className="mt-3 text-[12.5px] text-ink-2">{meta.blurb}</p>
+          <p className="mt-3 text-[12.5px] text-ink-muted">{meta.blurb}</p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-3" />
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle" />
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={role === "asr" ? "Search by name or language (e.g. Cantonese)" : "Search models"}
-                className="h-8 w-full rounded-[8px] border border-line bg-raised pr-2 pl-8 text-[13px] outline-none placeholder:text-ink-3 focus:border-line-strong" />
+                className="h-8 w-full rounded-md border border-line bg-paper-raised pr-2 pl-8 text-[13px] outline-none placeholder:text-ink-subtle focus:border-line-strong" />
             </div>
             {role === "asr" && (
               <>
-                <label className="flex items-center gap-2 text-[12.5px] text-ink-2" title="Only models that support every language you picked">My languages only <Toggle checked={mine} onChange={setMine} label="My languages only" /></label>
-                <label className="flex items-center gap-2 text-[12.5px] text-ink-2" title="Include experimental and specialised models">Show all <Toggle checked={all} onChange={setAll} label="Show all models" /></label>
+                <label className="flex items-center gap-2 text-[12.5px] text-ink-muted" title="Only models that support every language you picked">My languages only <Toggle checked={mine} onChange={setMine} label="My languages only" /></label>
+                <label className="flex items-center gap-2 text-[12.5px] text-ink-muted" title="Include experimental and specialised models">Show all <Toggle checked={all} onChange={setAll} label="Show all models" /></label>
               </>
             )}
             <Button size="sm" variant="ghost" onClick={importFile} title="Add a .gguf model file you already have"><FilePlus2 className="size-3.5" />Add model file…</Button>
@@ -292,7 +292,7 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
               <div className="relative">
                 <IconButton label="How grades and speed are measured" onClick={() => setLegend((v) => !v)}><CircleHelp className="size-4" /></IconButton>
                 {legend && (
-                  <div className="absolute top-9 right-0 z-30 w-[330px] animate-rise rounded-[12px] border border-line bg-raised p-3.5 text-[12px] leading-relaxed text-ink-2 shadow-[var(--shadow-pop)]">
+                  <div className="absolute top-9 right-0 z-30 w-[330px] animate-rise rounded-lg border border-line bg-paper-raised p-3.5 text-[12px] leading-relaxed text-ink-muted shadow-[var(--shadow-raised)]">
                     <b className="text-ink">Accuracy</b> grade for {langName(lang)} from the error rate published by transcribe.cpp on the FLEURS test set (A ≤5%, B ≤9%, C ≤14%, D ≤22%, F &gt;22%).
                     <br /><b className="text-ink">Speed</b> is the published real-time factor on a reference laptop, not this Mac. Neither is a guarantee for your meetings.
                   </div>
@@ -301,7 +301,7 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
             )}
           </div>
           {role === "asr" && (
-            <div className="mt-3 grid grid-cols-[22px_1fr_44px_54px_72px_120px] gap-3 px-3 text-[11px] font-medium tracking-[0.03em] text-ink-3 uppercase">
+            <div className="mt-3 grid grid-cols-[22px_1fr_44px_54px_72px_120px] gap-3 px-3 text-[11px] font-medium tracking-[0.03em] text-ink-subtle uppercase">
               <span /> <span>Model</span> <span title={`Accuracy for ${langName(lang)}`}>{lang}</span> <span>Speed</span> <span className="text-right">Size</span> <span />
             </div>
           )}
@@ -312,7 +312,7 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
             if (!n) return null;
             const sources = [...new Set([...fc.map((m) => m.found!.source), ...others.map((o) => o.source)].map((s) => s.replace(/ \(.*\)$/, "")))];
             return (
-              <div className="mt-4 flex items-center gap-2.5 rounded-[10px] bg-accent-soft px-3 py-2 text-[13px] text-accent-ink">
+              <div className="mt-4 flex items-center gap-2.5 rounded-md bg-paper-sunken px-3 py-2 text-[13px] text-ink-muted">
                 <Laptop className="size-4 shrink-0" />
                 <div className="flex-1">Found {n} model{n > 1 ? "s" : ""} already on this Mac ({sources.join(", ")}). Use them with no download and no extra disk space.</div>
               </div>
@@ -322,17 +322,17 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
           <Table title="Installed on this Mac" models={installed} activeId={activeId} rec={rec} lang={lang} ramGb={ramGb} langs={langs} />
           <Table title={role === "asr" ? `Recommended for ${langs.map(langName).join(" + ")}` : "Recommended for this Mac"} models={recommended} activeId={activeId} rec={rec} lang={lang} ramGb={ramGb} langs={langs} />
           <Table title={role === "asr" ? (all ? "All models" : "More models") : "Other models"} models={rest} activeId={activeId} rec={rec} lang={lang} ramGb={ramGb} langs={langs} />
-          {role === "asr" && !all && <div className="mt-3 px-1 text-[12px] text-ink-3">{catalog.filter((m) => m.role === "asr" && !m.curated).length} more experimental and specialised models (Moonshine, Voxtral, Granite, GigaAM…) are hidden. Turn on “Show all” to see them.</div>}
-          <div className="mt-3 px-1 text-[12px] text-ink-3">Have a model file already? <button className="underline" onClick={importFile}>Add a .gguf file</button> (transcribe.cpp GGUF for transcription, llama.cpp GGUF for notes and search).</div>
+          {role === "asr" && !all && <div className="mt-3 px-1 text-[12px] text-ink-subtle">{catalog.filter((m) => m.role === "asr" && !m.curated).length} more experimental and specialised models (Moonshine, Voxtral, Granite, GigaAM…) are hidden. Turn on “Show all” to see them.</div>}
+          <div className="mt-3 px-1 text-[12px] text-ink-subtle">Have a model file already? <button className="underline" onClick={importFile}>Add a .gguf file</button> (transcribe.cpp GGUF for transcription, llama.cpp GGUF for notes and search).</div>
 
           {storage && (
-            <div className="mt-8 flex items-center gap-3 rounded-[var(--radius-card)] border border-line bg-raised px-4 py-3 text-[12.5px] text-ink-2">
-              <HardDrive className="size-4 text-ink-3" />
+            <div className="mt-8 flex items-center gap-3 rounded-lg border border-line bg-paper-raised px-4 py-3 text-[12.5px] text-ink-muted">
+              <HardDrive className="size-4 text-ink-subtle" />
               <div className="flex-1">Models use <b className="text-ink">{fmtBytes(storage.models)}</b> · Recordings {fmtBytes(storage.recordings)} · Database {fmtBytes(storage.database)}{storage.freeDisk != null && ` · ${fmtBytes(storage.freeDisk)} free`}</div>
               <Button size="sm" variant="ghost" onClick={() => api.revealDataFolder()}>Show in Finder</Button>
             </div>
           )}
-          {hardware && <div className="mt-2 px-1 text-[12px] text-ink-3">This Mac: {hardware.chip || hardware.arch} · {Math.round(hardware.totalRamGb)} GB memory · {hardware.gpu}</div>}
+          {hardware && <div className="mt-2 px-1 text-[12px] text-ink-subtle">This Mac: {hardware.chip || hardware.arch} · {Math.round(hardware.totalRamGb)} GB memory · {hardware.gpu}</div>}
         </div>
       </div>
     </div>

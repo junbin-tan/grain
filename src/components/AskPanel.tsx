@@ -18,7 +18,7 @@ function Answer({ text, sources, onSource }: { text: string; sources: Source[]; 
     const s = sources.find((x) => x.n === n);
     parts.push(
       <button key={k++} onClick={() => s && onSource(s)} disabled={!s} title={s ? `${s.meetingTitle}${s.startMs != null ? ` · ${fmtTs(s.startMs)}` : ""}` : undefined}
-        className="mx-[1px] inline-grid h-[17px] min-w-[17px] -translate-y-[1px] place-items-center rounded-[5px] bg-accent-soft px-1 align-middle text-[10.5px] font-semibold text-accent-ink hover:bg-accent/20">
+        className="gr-cite mx-[1px]">
         {n}
       </button>,
     );
@@ -91,13 +91,13 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
       <div className="scroll-y flex-1 px-4 py-3">
         {messages.length === 0 && !pending && (
           <div className={compact ? "pt-2" : "pt-[10vh]"}>
-            <div className={`mb-3 flex items-center gap-2 text-ink-2 ${compact ? "text-[13px]" : "justify-center text-[15px]"}`}>
+            <div className={`mb-3 flex items-center gap-2 text-ink-muted ${compact ? "text-[13px]" : "justify-center text-[15px]"}`}>
               <MessageCircle className="size-4" /> {meetingId ? "Ask about this meeting" : "Ask about any of your meetings"}
             </div>
-            {!llmReady && <div className={`mb-3 text-[12.5px] text-ink-3 ${compact ? "" : "text-center"}`}>Download a notes model in Models to get answers.</div>}
+            {!llmReady && <div className={`mb-3 text-[12.5px] text-ink-subtle ${compact ? "" : "text-center"}`}>Download a notes model in Models to get answers.</div>}
             <div className={`flex flex-wrap gap-1.5 ${compact ? "" : "mx-auto max-w-[520px] justify-center"}`}>
               {suggestions.map((s) => (
-                <button key={s} onClick={() => send(s)} className="rounded-full border border-line bg-raised px-3 py-1 text-[12.5px] text-ink-2 hover:bg-wash hover:text-ink">{s}</button>
+                <button key={s} onClick={() => send(s)} className="rounded-sm border border-line bg-paper-raised px-3 py-1 text-[12.5px] text-ink-muted hover:bg-paper-sunken hover:text-ink">{s}</button>
               ))}
             </div>
           </div>
@@ -106,7 +106,7 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
           {messages.map((m) =>
             m.role === "user" ? (
               <div key={m.id} className="mt-4 flex justify-end">
-                <div className="selectable max-w-[85%] rounded-[12px] bg-wash px-3 py-2 text-[13.5px] leading-[1.5] whitespace-pre-wrap">{m.content}</div>
+                <div className="selectable max-w-[85%] rounded-lg bg-paper-sunken px-3 py-2 text-[13.5px] leading-[1.5] whitespace-pre-wrap">{m.content}</div>
               </div>
             ) : (
               <div key={m.id} className="mt-4">
@@ -114,15 +114,15 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
                 {m.sources.length > 0 && (
                   <div className="mt-2.5 flex flex-col gap-1">
                     {m.sources.map((s) => (
-                      <button key={s.n} onClick={() => openSource(s)} className="flex items-start gap-2 rounded-[8px] border border-line bg-raised px-2.5 py-1.5 text-left hover:bg-wash">
-                        <span className="mt-[1px] grid h-[17px] min-w-[17px] place-items-center rounded-[5px] bg-accent-soft text-[10.5px] font-semibold text-accent">{s.n}</span>
+                      <button key={s.n} onClick={() => openSource(s)} className="flex items-start gap-2 rounded-md border border-line bg-paper-raised px-2.5 py-1.5 text-left hover:bg-paper-sunken">
+                        <span className="gr-cite mt-[1px] shrink-0">{s.n}</span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5 text-[12px] font-medium text-ink">
-                            {s.kind === "segment" ? <Quote className="size-3 text-ink-3" /> : <FileText className="size-3 text-ink-3" />}
+                            {s.kind === "segment" ? <Quote className="size-3 text-ink-subtle" /> : <FileText className="size-3 text-ink-subtle" />}
                             <span className="truncate">{s.meetingTitle || "Untitled meeting"}</span>
-                            <span className="shrink-0 font-normal text-ink-3">· {fmtDate(s.meetingDate)}{s.startMs != null && ` · ${fmtTs(s.startMs)}`}</span>
+                            <span className="shrink-0 font-normal text-ink-subtle">· {fmtDate(s.meetingDate)}{s.startMs != null && ` · ${fmtTs(s.startMs)}`}</span>
                           </span>
-                          <span className="mt-0.5 line-clamp-2 block text-[12px] text-ink-2">{s.excerpt}</span>
+                          <span className="mt-0.5 line-clamp-2 block text-[12px] text-ink-muted">{s.excerpt}</span>
                         </span>
                       </button>
                     ))}
@@ -133,7 +133,7 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
           )}
           {pending && (
             <div className="mt-4">
-              {stream ? <Answer text={stream} sources={[]} onSource={() => {}} /> : <div className="flex items-center gap-2 text-[13px] text-ink-3"><Spinner /> Searching your meetings…</div>}
+              {stream ? <Answer text={stream} sources={[]} onSource={() => {}} /> : <div className="flex items-center gap-2 text-[13px] text-ink-subtle"><Spinner /> Searching your meetings…</div>}
             </div>
           )}
           <div ref={endRef} />
@@ -141,16 +141,16 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
       </div>
       <div className={`px-3 pb-3 ${compact ? "" : "mx-auto w-full max-w-[720px]"}`}>
         <form onSubmit={(e) => { e.preventDefault(); send(input); }}
-          className="flex items-end gap-2 rounded-[12px] border border-line-strong bg-raised p-1.5 pl-3 shadow-[var(--shadow-float)] focus-within:border-ink-3">
+          className="flex items-end gap-2 rounded-lg border border-line-strong bg-paper-raised p-1.5 pl-3 focus-within:border-ink-muted">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} placeholder={meetingId ? "Ask about this meeting…" : "Ask anything about your meetings…"}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
-            className="max-h-32 min-h-[30px] flex-1 resize-none bg-transparent py-1.5 text-[13.5px] outline-none placeholder:text-ink-3" autoFocus={!compact} />
+            className="max-h-32 min-h-[30px] flex-1 resize-none bg-transparent py-1.5 text-[13.5px] outline-none placeholder:text-ink-subtle" autoFocus={!compact} />
           <button type="submit" aria-label="Send" disabled={!input.trim() || pending}
-            className="grid size-[30px] place-items-center rounded-full bg-ink text-white hover:bg-ink/88 disabled:bg-line-strong">
-            {pending ? <Spinner className="text-white" /> : <ArrowUp className="size-4" />}
+            className="grid size-[30px] place-items-center rounded-md bg-ink text-paper hover:bg-ink/88 disabled:bg-line-strong">
+            {pending ? <Spinner className="text-paper" /> : <ArrowUp className="size-4" />}
           </button>
         </form>
-        <div className="mt-1.5 text-center text-[11px] text-ink-3">Answers come from a local model using only your meetings. Check important details against the sources.</div>
+        <div className="mt-1.5 text-center text-[11px] text-ink-subtle">Answers come from a local model using only your meetings. Check important details against the sources.</div>
       </div>
     </div>
   );

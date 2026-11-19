@@ -8,11 +8,11 @@ export function Toasts() {
       {toasts.map((t) => {
         const Icon = t.kind === "error" ? AlertCircle : t.kind === "success" ? CheckCircle2 : Info;
         return (
-          <div key={t.id} role={t.kind === "error" ? "alert" : "status"} className="pointer-events-auto flex animate-rise items-start gap-2.5 rounded-[11px] border border-line bg-raised px-3 py-2.5 shadow-[var(--shadow-pop)]">
-            <Icon className={`mt-[1px] size-4 shrink-0 ${t.kind === "error" ? "text-rec" : t.kind === "success" ? "text-accent" : "text-ink-3"}`} />
+          <div key={t.id} role={t.kind === "error" ? "alert" : "status"} className="pointer-events-auto flex animate-rise items-start gap-2.5 rounded-md border border-line bg-paper-raised px-3 py-2.5 shadow-[var(--shadow-raised)]">
+            <Icon className={`mt-[1px] size-4 shrink-0 ${t.kind === "error" ? "text-clay" : t.kind === "success" ? "text-sprout" : "text-ink-subtle"}`} />
             <div className="flex-1 text-[13px] leading-snug text-ink">{t.text}</div>
-            {t.action && <button onClick={() => { t.action!.run(); dismiss(t.id); }} className="shrink-0 text-[12.5px] font-medium text-accent hover:underline">{t.action.label}</button>}
-            <button aria-label="Dismiss" onClick={() => dismiss(t.id)} className="shrink-0 text-ink-3 hover:text-ink"><X className="size-3.5" /></button>
+            {t.action && <button onClick={() => { t.action!.run(); dismiss(t.id); }} className="shrink-0 text-[12.5px] font-medium text-ink underline">{t.action.label}</button>}
+            <button aria-label="Dismiss" onClick={() => dismiss(t.id)} className="shrink-0 text-ink-subtle hover:text-ink"><X className="size-3.5" /></button>
           </div>
         );
       })}

@@ -1,13 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { confirm, openFolder } from "../lib/dialogs";
-import { Mic, MonitorSpeaker, Plus, ShieldCheck, Trash2 } from "lucide-react";
+import { AudioLines, Mic, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { api, on, type Device, type Permissions, type Template } from "../lib/api";
 import { fmtBytes, langName, LANGUAGES, PRIORITY_LANGUAGES } from "../lib/format";
 import { useApp } from "../lib/store";
 import { Badge, Button, Kbd, LevelBars, Select, Toggle } from "../components/ui";
 
 const SECTIONS = [
-  ["general", "General"], ["audio", "Audio"], ["transcription", "Transcription"], ["notes", "AI notes & templates"],
+  ["general", "General"], ["audio", "Audio"], ["transcription", "Transcription"], ["notes", "Notes & templates"],
   ["search", "Search"], ["privacy", "Privacy & data"], ["shortcuts", "Keyboard shortcuts"], ["about", "About"],
 ] as const;
 
@@ -16,7 +16,7 @@ function Row({ label, desc, children }: { label: string; desc?: ReactNode; child
     <div className="flex items-center gap-6 border-b border-line py-3.5 last:border-0">
       <div className="flex-1">
         <div className="text-[13.5px] font-medium text-ink">{label}</div>
-        {desc && <div className="mt-0.5 text-[12.5px] leading-snug text-ink-2">{desc}</div>}
+        {desc && <div className="mt-0.5 text-[12.5px] leading-snug text-ink-muted">{desc}</div>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -26,8 +26,8 @@ function Row({ label, desc, children }: { label: string; desc?: ReactNode; child
 function Card({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <section className="mt-6">
-      {title && <h2 className="mb-2 px-1 text-[12.5px] font-semibold text-ink-2">{title}</h2>}
-      <div className="rounded-[var(--radius-card)] border border-line bg-raised px-4">{children}</div>
+      {title && <h2 className="mb-2 px-1 text-[12.5px] font-semibold text-ink-muted">{title}</h2>}
+      <div className="rounded-lg border border-line bg-paper-raised px-4">{children}</div>
     </section>
   );
 }
@@ -40,7 +40,7 @@ export function LanguagePicker() {
     <div className="flex flex-wrap gap-1.5">
       {PRIORITY_LANGUAGES.map((l) => (
         <button key={l} onClick={() => toggle(l)} aria-pressed={langs.includes(l)}
-          className={`h-7 rounded-full border px-3 text-[12.5px] ${langs.includes(l) ? "border-accent bg-accent-soft text-accent-ink" : "border-line bg-raised text-ink-2 hover:bg-wash"}`}>
+          className={`h-7 rounded-sm border px-3 text-[12.5px] ${langs.includes(l) ? "border-ink bg-ink text-paper" : "border-line bg-paper-raised text-ink-muted hover:bg-paper-sunken"}`}>
           {langName(l)}
         </button>
       ))}
@@ -69,11 +69,11 @@ export function AudioTest() {
       setLevels({ mic: 0, system: 0 });
     }
   };
-  const verdict = (v: number) => (v > 0.05 ? <Badge tone="accent">Heard</Badge> : v > 0.005 ? <Badge tone="warn">Very quiet</Badge> : <Badge>Silent</Badge>);
+  const verdict = (v: number) => (v > 0.05 ? <Badge tone="sprout">Heard</Badge> : v > 0.005 ? <Badge tone="clay">Very quiet</Badge> : <Badge>Silent</Badge>);
   return (
     <div className="flex items-center gap-4">
-      <span className="flex items-center gap-1.5 text-accent"><Mic className="size-4" /><LevelBars level={levels.mic} active={running} bars={7} /></span>
-      <span className="flex items-center gap-1.5 text-them"><MonitorSpeaker className="size-4" /><LevelBars level={levels.system} active={running} bars={7} /></span>
+      <span className="flex items-center gap-1.5 text-speaker-me"><Mic className="size-4" /><LevelBars level={levels.mic} active={running} /></span>
+      <span className="flex items-center gap-1.5 text-speaker-them"><AudioLines className="size-4" /><LevelBars level={levels.system} active={running} /></span>
       <Button size="sm" onClick={run} loading={running}>{running ? "Listening 5 s…" : "Test audio"}</Button>
       {result && <span className="flex gap-1.5 text-[12px]">Mic {verdict(result.mic)} System {verdict(result.system)}</span>}
     </div>
@@ -89,10 +89,10 @@ function Templates() {
   return (
     <div className="py-3">
       {list.map((t) => (
-        <div key={t.id} className="group flex items-start gap-3 rounded-[8px] px-2 py-2 hover:bg-paper">
+        <div key={t.id} className="group flex items-start gap-3 rounded-md px-2 py-2 hover:bg-paper">
           <div className="flex-1">
-            <div className="text-[13px] font-medium">{t.name} {t.builtin && <span className="text-[11.5px] font-normal text-ink-3">· built-in</span>}</div>
-            <div className="text-[12px] text-ink-2">{t.instructions}</div>
+            <div className="text-[13px] font-medium">{t.name} {t.builtin && <span className="text-[11.5px] font-normal text-ink-subtle">· built-in</span>}</div>
+            <div className="text-[12px] text-ink-muted">{t.instructions}</div>
           </div>
           {!t.builtin && (
             <div className="flex gap-1 opacity-0 group-hover:opacity-100">
@@ -103,10 +103,10 @@ function Templates() {
         </div>
       ))}
       {edit ? (
-        <div className="mt-2 rounded-[10px] border border-line p-3">
-          <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} placeholder="Template name (e.g. Sales call)" className="h-8 w-full rounded-[7px] border border-line px-2 text-[13px] outline-none focus:border-line-strong" />
+        <div className="mt-2 rounded-md border border-line p-3">
+          <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} placeholder="Template name (e.g. Sales call)" className="h-8 w-full rounded-md border border-line px-2 text-[13px] outline-none focus:border-line-strong" />
           <textarea value={edit.instructions} onChange={(e) => setEdit({ ...edit, instructions: e.target.value })} rows={3} placeholder="What should the notes focus on? e.g. Customer's goals, objections, budget, next steps."
-            className="mt-2 w-full rounded-[7px] border border-line p-2 text-[13px] outline-none focus:border-line-strong" />
+            className="mt-2 w-full rounded-md border border-line p-2 text-[13px] outline-none focus:border-line-strong" />
           <div className="mt-2 flex justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={() => setEdit(null)}>Cancel</Button>
             <Button size="sm" variant="primary" onClick={async () => { try { await api.saveTemplate(edit.name, edit.instructions, edit.id); setEdit(null); load(); } catch (e) { toast(String(e), "error"); } }}>Save template</Button>
@@ -160,14 +160,14 @@ export function SettingsPage({ section: initial }: { section?: string }) {
       <nav className="w-[200px] shrink-0 border-r border-line px-2">
         <div className="drag h-[52px]" />
         {SECTIONS.map(([id, label]) => (
-          <button key={id} onClick={() => setSection(id)} className={`flex h-[30px] w-full items-center rounded-[7px] px-2.5 text-[13px] ${section === id ? "bg-wash font-medium text-ink" : "text-ink-2 hover:bg-wash"}`}>{label}</button>
+          <button key={id} onClick={() => setSection(id)} className={`flex h-[30px] w-full items-center rounded-md px-2.5 text-[13px] ${section === id ? "bg-paper-sunken font-medium text-ink" : "text-ink-muted hover:bg-paper-sunken"}`}>{label}</button>
         ))}
       </nav>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="drag h-[52px] shrink-0" />
         <div className="scroll-y flex-1">
           <div className="mx-auto max-w-[680px] px-8 pb-20">
-            <h1 className="font-serif text-[26px] font-semibold">{SECTIONS.find((s) => s[0] === section)?.[1]}</h1>
+            <h1 className="title">{SECTIONS.find((s) => s[0] === section)?.[1]}</h1>
 
             {section === "general" && (
               <Card>
@@ -175,7 +175,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                   <Select label="Default template" value={settings.defaultTemplate ?? "general"} onChange={(v) => setSetting("defaultTemplate", v)} options={templates.map((t) => ({ value: t.id, label: t.name }))} className="w-[220px]" />
                 </Row>
                 <Row label="Your name" desc="Optional. Helps Ask Grain answer “what did I commit to?”. Only stored on this Mac.">
-                  <input defaultValue={settings.userName ?? ""} onBlur={(e) => setSetting("userName", e.target.value.trim())} placeholder="e.g. Alex" className="h-8 w-[220px] rounded-[8px] border border-line-strong px-2 text-[13px] outline-none" />
+                  <input defaultValue={settings.userName ?? ""} onBlur={(e) => setSetting("userName", e.target.value.trim())} placeholder="e.g. Alex" className="h-8 w-[220px] rounded-md border border-line-strong px-2 text-[13px] outline-none" />
                 </Row>
                 <Row label="Run setup again" desc="Revisit languages, models and permissions."><Button size="sm" onClick={() => setSetting("onboardingDone", false)}>Open setup</Button></Row>
               </Card>
@@ -195,10 +195,10 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                 </Card>
                 <Card title="Permissions">
                   <Row label="Microphone access" desc={perms?.mic === "denied" ? "Denied. Enable Grain in System Settings › Privacy & Security › Microphone." : undefined}>
-                    {perms?.mic === "granted" ? <Badge tone="accent">Allowed</Badge> : perms?.mic === "denied" ? <Button size="sm" onClick={() => api.openPrivacySettings("mic")}>Open System Settings</Button> : <Button size="sm" onClick={async () => setPerms(await api.requestPermission("mic"))}>Allow</Button>}
+                    {perms?.mic === "granted" ? <Badge tone="sprout">Allowed</Badge> : perms?.mic === "denied" ? <Button size="sm" onClick={() => api.openPrivacySettings("mic")}>Open System Settings</Button> : <Button size="sm" onClick={async () => setPerms(await api.requestPermission("mic"))}>Allow</Button>}
                   </Row>
                   <Row label="Screen & system audio recording" desc="Required by macOS to capture computer audio. Grain never records your screen.">
-                    {perms?.screen === "granted" ? <Badge tone="accent">Allowed</Badge> : <div className="flex gap-1.5"><Button size="sm" onClick={async () => setPerms(await api.requestPermission("screen"))}>Allow</Button><Button size="sm" variant="ghost" onClick={() => api.openPrivacySettings("screen")}>Open Settings</Button></div>}
+                    {perms?.screen === "granted" ? <Badge tone="sprout">Allowed</Badge> : <div className="flex gap-1.5"><Button size="sm" onClick={async () => setPerms(await api.requestPermission("screen"))}>Allow</Button><Button size="sm" variant="ghost" onClick={() => api.openPrivacySettings("screen")}>Open Settings</Button></div>}
                   </Row>
                 </Card>
               </>
@@ -218,7 +218,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                 </Card>
                 <Card title="Your languages">
                   <div className="py-3.5">
-                    <div className="mb-2.5 text-[12.5px] text-ink-2">Used for model recommendations and as language hints.</div>
+                    <div className="mb-2.5 text-[12.5px] text-ink-muted">Used for model recommendations and as language hints.</div>
                     <LanguagePicker />
                   </div>
                 </Card>
@@ -245,7 +245,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
 
             {section === "privacy" && (
               <>
-                <div className="mt-5 flex gap-3 rounded-[var(--radius-card)] bg-accent-soft p-4 text-[13px] leading-relaxed text-accent-ink">
+                <div className="mt-5 flex gap-3 rounded-lg bg-paper-sunken p-4 text-[13px] leading-relaxed text-ink-muted">
                   <ShieldCheck className="mt-0.5 size-5 shrink-0" />
                   <div>Grain has no account, no telemetry and no cloud. Audio, transcripts, notes, embeddings and chats are stored only in the folder below. The only network requests Grain makes are model downloads you start in Models. The local AI runtime is started with networking disabled and only listens on 127.0.0.1.</div>
                 </div>
@@ -259,7 +259,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                     <Toggle label="Find models other apps downloaded" checked={settings.scanOtherApps !== false} onChange={async (v) => { await setSetting("scanOtherApps", v); await api.rescanLocalModels(); refreshCatalog(); }} />
                   </Row>
                   <Row label="Also look in these folders" desc={<>{((settings.modelFolders as string[]) ?? []).map((f) => (
-                      <span key={f} className="mr-1.5 mt-1 inline-flex items-center gap-1 rounded-[6px] bg-wash px-1.5 py-0.5 font-mono text-[11px]">{f}
+                      <span key={f} className="mr-1.5 mt-1 inline-flex items-center gap-1 rounded-sm bg-paper-sunken px-1.5 py-0.5 font-mono text-[11px]">{f}
                         <button aria-label={`Stop looking in ${f}`} onClick={async () => { await setSetting("modelFolders", ((settings.modelFolders as string[]) ?? []).filter((x) => x !== f)); await api.rescanLocalModels(); refreshCatalog(); }}>×</button></span>
                     ))}{!((settings.modelFolders as string[]) ?? []).length && "Sharing this Mac? Put model files in /Users/Shared and every account's Grain finds them."}</>}>
                     <Button size="sm" onClick={async () => { const f = await openFolder(); if (!f) return; await setSetting("modelFolders", [...new Set([...(((settings.modelFolders as string[]) ?? [])), f])]); await api.rescanLocalModels(); refreshCatalog(); }}>Add folder…</Button>
@@ -278,7 +278,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                   </Row>
                 </Card>
                 <Card title="Recording consent">
-                  <div className="py-3.5 text-[12.5px] leading-relaxed text-ink-2">Recording laws differ between countries and states. Some require everyone's consent. Tell participants you are recording and stop if anyone objects. Grain shows a recording indicator in the window and the menu bar whenever it records, and only records after you press Record.</div>
+                  <div className="py-3.5 text-[12.5px] leading-relaxed text-ink-muted">Recording laws differ between countries and states. Some require everyone's consent. Tell participants you are recording and stop if anyone objects. Grain shows a recording indicator in the window and the menu bar whenever it records, and only records after you press Record.</div>
                 </Card>
               </>
             )}
@@ -289,7 +289,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
 
             {section === "about" && (
               <Card>
-                <Row label="Grain" desc="Version 0.1.0 · MIT licence">{hardware && <span className="text-[12px] text-ink-3">{hardware.os} {hardware.osVersion} · {hardware.arch}</span>}</Row>
+                <Row label="Grain" desc="Version 0.1.0 · MIT licence">{hardware && <span className="text-[12px] text-ink-subtle">{hardware.os} {hardware.osVersion} · {hardware.arch}</span>}</Row>
                 <Row label="Speech recognition" desc="transcribe.cpp (MIT) on ggml with Metal. Model catalogue from Handy (MIT)."><span /></Row>
                 <Row label="Language models" desc="llama.cpp (MIT) llama-server, bundled. Models: Qwen3 family (Apache-2.0)."><span /></Row>
                 <Row label="Model licences" desc="Each model has its own licence, shown in Models. Some (e.g. CC-BY-NC) restrict commercial use."><span /></Row>

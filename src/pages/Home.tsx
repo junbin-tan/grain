@@ -7,10 +7,10 @@ import { Badge, Banner, Button, EmptyState, IconButton, Kbd, Menu, MenuItem, Rec
 import { confirm } from "../lib/dialogs";
 
 function StatusBadge({ m, processing }: { m: Meeting; processing?: string }) {
-  if (processing) return <Badge tone="accent">{processing}</Badge>;
-  if (m.status === "recording") return <Badge tone="rec"><RecDot pulse className="size-1.5" />Recording</Badge>;
-  if (m.status === "paused") return <Badge tone="rec">Paused</Badge>;
-  if (m.status === "interrupted") return <Badge tone="warn"><AlertTriangle className="size-3" />Interrupted</Badge>;
+  if (processing) return <Badge>{processing}</Badge>;
+  if (m.status === "recording") return <Badge tone="clay"><RecDot pulse className="size-1.5" />Recording</Badge>;
+  if (m.status === "paused") return <Badge tone="clay">Paused</Badge>;
+  if (m.status === "interrupted") return <Badge tone="clay"><AlertTriangle className="size-3" />Interrupted</Badge>;
   return null;
 }
 
@@ -45,29 +45,29 @@ export function Home() {
     <div className="flex h-full flex-col">
       <header className="drag flex h-[52px] shrink-0 items-center justify-end gap-2 px-5">
         <div className="no-drag relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-3" />
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-ink-subtle" />
           <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter meetings"
-            className="h-8 w-[220px] rounded-[8px] border border-line bg-raised pr-2 pl-8 text-[13px] outline-none placeholder:text-ink-3 focus:border-line-strong" />
+            className="h-8 w-[220px] rounded-md border border-line bg-paper-raised pr-2 pl-8 text-[13px] outline-none placeholder:text-ink-subtle focus:border-line-strong" />
         </div>
       </header>
       <div className="scroll-y flex-1">
         <div className="mx-auto w-full max-w-[760px] px-8 pb-24">
-          <h1 className="mt-4 font-serif text-[30px] font-semibold tracking-[-0.01em]">Meetings</h1>
+          <h1 className="mt-4 title">Meetings</h1>
 
           {(!asrReady || !llmReady) && (
             <div className="mt-4">
-              <Banner tone="warn" icon={<AlertTriangle className="size-4" />}
+              <Banner tone="clay" icon={<AlertTriangle className="size-4" />}
                 action={<Button size="sm" onClick={() => navigate({ name: "models", role: !asrReady ? "asr" : "llm" })}>Open Models</Button>}>
                 {!asrReady ? "Download a speech model to transcribe meetings." : "Download a notes model to generate enhanced notes and ask questions."}
               </Banner>
             </div>
           )}
 
-          <div className="mt-5 flex items-center gap-3 rounded-[var(--radius-card)] border border-line bg-raised p-4 shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
-            <div className="grid size-10 place-items-center rounded-[10px] bg-accent-soft text-accent"><Mic className="size-5" /></div>
+          <div className="mt-5 flex items-center gap-3 rounded-lg border border-line bg-paper-raised p-4 ">
+            <div className="grid size-10 place-items-center rounded-md bg-paper-sunken text-ink"><Mic className="size-5" /></div>
             <div className="flex-1">
               <div className="text-[14px] font-semibold">Start a meeting</div>
-              <div className="text-[12.5px] text-ink-2">Grain records your mic and computer audio, with no bot joining. Works with Zoom, Meet, Teams and in-person meetings.</div>
+              <div className="text-[12.5px] text-ink-muted">Grain records your mic and computer audio, with no bot joining. Works with Zoom, Meet, Teams and in-person meetings.</div>
             </div>
             <RecordButton onClick={() => newMeeting(true)}>Record</RecordButton>
           </div>
@@ -78,21 +78,21 @@ export function Home() {
               <Button onClick={() => newMeeting(false)}>New note without recording</Button>
             </EmptyState>
           ) : groups.length === 0 ? (
-            <div className="py-12 text-center text-[13px] text-ink-2">No meetings match "{filter}". <button className="underline" onClick={() => setSearchOpen(true)}>Search everything</button> <Kbd>⌘K</Kbd></div>
+            <div className="py-12 text-center text-[13px] text-ink-muted">No meetings match "{filter}". <button className="underline" onClick={() => setSearchOpen(true)}>Search everything</button> <Kbd>⌘K</Kbd></div>
           ) : (
             groups.map(([label, items]) => (
               <section key={label} className="mt-7">
-                <h2 className="mb-1 px-2 text-[12px] font-medium text-ink-3">{label}</h2>
+                <h2 className="mb-1 px-2 text-[12px] font-medium text-ink-subtle">{label}</h2>
                 {items.map(({ meeting: m, preview }) => (
                   <div key={m.id} role="button" tabIndex={0} onClick={() => navigate({ name: "meeting", id: m.id })} onKeyDown={(e) => e.key === "Enter" && navigate({ name: "meeting", id: m.id })}
-                    className="group flex items-start gap-3 rounded-[10px] px-2 py-2.5 hover:bg-wash">
-                    <div className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-[8px] border border-line bg-raised text-ink-3"><FileText className="size-4" /></div>
+                    className="group flex items-start gap-3 rounded-md px-2 py-2.5 hover:bg-paper-sunken">
+                    <div className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md border border-line bg-paper-raised text-ink-subtle"><FileText className="size-4" /></div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[14px] font-medium">{m.title || "Untitled meeting"}</span>
                         <StatusBadge m={m} processing={processing[m.id]} />
                       </div>
-                      <div className="mt-0.5 truncate text-[12.5px] text-ink-3">
+                      <div className="mt-0.5 truncate text-[12.5px] text-ink-subtle">
                         {fmtTime(m.startedAt ?? m.createdAt)}{m.durationMs > 0 && ` · ${fmtDuration(m.durationMs)}`}{preview && ` · ${preview.replace(/[#*\-[\]()]/g, "").replace(/\s+/g, " ").slice(0, 120)}`}
                       </div>
                     </div>

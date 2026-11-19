@@ -9,5 +9,5 @@ export default defineConfig({
   server: { port: 1420, strictPort: true, watch: { ignored: ["**/src-tauri/**"] } },
   envPrefix: ["VITE_", "TAURI_"],
   build: { target: "safari16", sourcemap: false, chunkSizeWarningLimit: 1500 },
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  test: { environment: "node", include: ["src/**/*.test.ts"], css: { include: [/\?raw$/] } },
 });

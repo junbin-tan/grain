@@ -53,16 +53,16 @@ export function ExportDialog({ open, onClose, meetingId, title, hasAudio }: { op
               const disabled = f.id === "wav" && !hasAudio;
               return (
                 <button key={f.id} disabled={disabled} onClick={() => setFmt(f.id)}
-                  className={`flex w-full items-center gap-2 rounded-[8px] px-2.5 py-2 text-left text-[13px] disabled:opacity-40 ${fmt === f.id ? "bg-wash font-medium" : "hover:bg-wash"}`}>
-                  <f.icon className="size-4 text-ink-3" />{f.label}
+                  className={`flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[13px] disabled:opacity-40 ${fmt === f.id ? "bg-paper-sunken font-medium" : "hover:bg-paper-sunken"}`}>
+                  <f.icon className="size-4 text-ink-subtle" />{f.label}
                 </button>
               );
             })}
           </div>
           <div className="flex flex-col p-4">
-            <div className="text-[12.5px] text-ink-2">{FORMATS.find((x) => x.id === fmt)!.desc}</div>
-            {fmt !== "wav" && <pre className="scroll-y selectable mt-3 h-[220px] rounded-[8px] border border-line bg-paper p-3 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-ink-2">{preview}</pre>}
-            {fmt === "wav" && <div className="mt-3 text-[12.5px] text-ink-3">16 kHz mono WAV. Files are written only where you choose.</div>}
+            <div className="text-[12.5px] text-ink-muted">{FORMATS.find((x) => x.id === fmt)!.desc}</div>
+            {fmt !== "wav" && <pre className="scroll-y selectable mt-3 h-[220px] rounded-md border border-line bg-paper p-3 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-ink-muted">{preview}</pre>}
+            {fmt === "wav" && <div className="mt-3 text-[12.5px] text-ink-subtle">16 kHz mono WAV. Files are written only where you choose.</div>}
             <div className="mt-4 flex justify-end gap-2">
               <Button variant="ghost" onClick={onClose}>Cancel</Button>
               <Button variant="primary" loading={busy} onClick={run}>{fmt === "pdf" ? "Print / Save PDF" : "Export…"}</Button>

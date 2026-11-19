@@ -1,38 +1,32 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter/opsz.css";
+@import "@fontsource-variable/newsreader/opsz.css";
+@import "@fontsource-variable/jetbrains-mono";
+/* Grain design system: design/README.md. Tokens and gr- components sit in layers so Tailwind utilities can still override them. */
+@import "../design/tokens.css" layer(base);
+@import "./components.css" layer(components);
 
-/* Grain design tokens — see docs/DESIGN_SYSTEM.md */
-@theme {
-  --color-paper: #fbfaf7;
-  --color-sidebar: #f4f2ec;
-  --color-raised: #ffffff;
-  --color-wash: #efece4;
-  --color-line: #e7e3da;
-  --color-line-strong: #d8d3c7;
-  --color-ink: #1f2420;
-  --color-ink-2: #555a53;
-  --color-ink-3: #8b8f87;
-  --color-ink-ai: #3a403a; /* AI-written note text: one step lighter than the user's words */
-  /* Each tone is a trio: solid (dots, icons, fills), soft (backgrounds), ink (text on soft, AA contrast). */
-  --color-accent: #3f5a36; /* brand: the app icon tile is exactly this */
-  --color-accent-soft: #e6ecdd;
-  --color-accent-ink: #2f4428;
-  --color-rec: #e0483a; /* recording only */
-  --color-rec-soft: #fbe5e2;
-  --color-rec-ink: #9b2f24;
-  --color-warn: #a86a12;
-  --color-warn-soft: #f8ecd6;
-  --color-warn-ink: #7a4d0c;
-  --color-them: #5b4a7a; /* remote speaker */
-  --color-them-soft: #ece7f3;
-  --color-highlight: #f3e6b5;
-
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", sans-serif;
-  --font-serif: ui-serif, "New York", "Iowan Old Style", Georgia, "Songti SC", serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
-
-  --radius-card: 12px;
-  --shadow-float: 0 1px 2px rgb(31 36 32 / 0.06), 0 8px 28px -8px rgb(31 36 32 / 0.18);
-  --shadow-pop: 0 2px 6px rgb(31 36 32 / 0.08), 0 18px 48px -12px rgb(31 36 32 / 0.28);
+/* Tailwind colour utilities read the design tokens directly, so dark mode follows tokens.css. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunken: var(--paper-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-malt: var(--malt);
+  --color-malt-ink: var(--malt-ink);
+  --color-malt-tint: var(--malt-tint);
+  --color-on-malt: var(--on-malt);
+  --color-sprout: var(--sprout);
+  --color-sprout-tint: var(--sprout-tint);
+  --color-clay: var(--clay);
+  --color-clay-tint: var(--clay-tint);
+  --color-rec: var(--rec);
+  --color-speaker-me: var(--speaker-me);
+  --color-speaker-them: var(--speaker-them);
 
   --animate-rise: rise 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
   --animate-fade: fade 140ms ease-out;
@@ -40,16 +34,24 @@
   --animate-shimmer: shimmer 1.4s linear infinite;
 }
 
+/* The bundled fonts register as "… Variable"; same stacks as tokens.css otherwise. */
+:root {
+  --font-sans: "Inter Variable", Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", sans-serif;
+  --font-serif: "Newsreader Variable", Newsreader, "Iowan Old Style", Charter, Georgia, "Songti SC", serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+}
+
 @keyframes rise { from { opacity: 0; transform: translateY(6px) scale(0.99); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes pulse-rec { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes shimmer { from { background-position: -400px 0; } to { background-position: 400px 0; } }
+@media (prefers-reduced-motion: reduce) { .animate-pulse-rec, .gr-rec__dot { animation: none !important; } }
 
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
@@ -60,46 +62,48 @@ body {
 input, textarea, [contenteditable="true"], .ProseMirror, .selectable { user-select: text; -webkit-user-select: text; }
 button { cursor: default; }
 :is(input, textarea, select, [contenteditable]):focus-visible { outline: none; }
-:focus-visible { outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent); outline-offset: 1px; }
-::selection { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+::selection { background: var(--malt-tint); }
 .drag { -webkit-app-region: drag; app-region: drag; }
 .no-drag { -webkit-app-region: no-drag; app-region: no-drag; }
-.scroll-y { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
-mark { background: var(--color-highlight); color: inherit; border-radius: 2px; padding: 0 1px; }
+.scroll-y { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+mark { background: var(--malt-tint); color: inherit; border-radius: 2px; padding: 0 1px; }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--color-wash) 0%, #f7f5f0 40%, var(--color-wash) 80%);
+  background: linear-gradient(90deg, var(--paper-sunken) 0%, var(--paper-raised) 40%, var(--paper-sunken) 80%);
   background-size: 800px 100%;
   animation: var(--animate-shimmer);
   border-radius: 6px;
 }
 
-/* Note editor (TipTap/ProseMirror) */
-.ProseMirror { outline: none; font-size: 15.5px; line-height: 1.65; color: var(--color-ink); min-height: 40vh; padding-bottom: 160px; }
+/* Note editor (TipTap/ProseMirror). Sans for what you typed; serif for what Grain wrote. */
+.ProseMirror { outline: none; font-size: 15px; line-height: 1.65; color: var(--ink); min-height: 40vh; padding-bottom: 160px; }
 .ProseMirror p { margin: 0.35em 0; }
-.ProseMirror h1 { font-size: 1.45em; font-weight: 650; margin: 1.1em 0 0.35em; letter-spacing: -0.01em; }
-.ProseMirror h2 { font-size: 1.12em; font-weight: 650; margin: 1.3em 0 0.3em; letter-spacing: -0.005em; }
-.ProseMirror h3 { font-size: 1em; font-weight: 650; margin: 1em 0 0.25em; }
+.ProseMirror h1 { font-size: 1.45em; font-weight: 600; margin: 1.1em 0 0.35em; letter-spacing: -0.01em; }
+.ProseMirror h2 { font-size: 1.12em; font-weight: 600; margin: 1.3em 0 0.3em; letter-spacing: -0.01em; }
+.ProseMirror h3 { font-size: 1em; font-weight: 600; margin: 1em 0 0.25em; }
 .ProseMirror ul, .ProseMirror ol { padding-left: 1.35em; margin: 0.3em 0; }
 .ProseMirror ul { list-style: disc; }
 .ProseMirror ol { list-style: decimal; }
-.ProseMirror li::marker { color: var(--color-ink-3); }
+.ProseMirror li::marker { color: var(--ink-subtle); }
 .ProseMirror li { margin: 0.12em 0; }
 .ProseMirror li p { margin: 0; }
 .ProseMirror ul[data-type="taskList"] { list-style: none; padding-left: 0.2em; }
 .ProseMirror ul[data-type="taskList"] li { display: flex; gap: 0.5em; align-items: flex-start; }
 .ProseMirror ul[data-type="taskList"] li > label { margin-top: 0.28em; }
-.ProseMirror ul[data-type="taskList"] input { accent-color: var(--color-accent); }
-.ProseMirror blockquote { border-left: 2px solid var(--color-line-strong); padding-left: 0.9em; color: var(--color-ink-2); margin: 0.5em 0; }
-.ProseMirror code { font-family: var(--font-mono); font-size: 0.88em; background: var(--color-wash); padding: 0.1em 0.3em; border-radius: 4px; }
-.ProseMirror a { color: var(--color-ink-3); text-decoration: none; font-size: 0.82em; font-variant-numeric: tabular-nums; padding: 0 0.25em; border-radius: 4px; background: var(--color-wash); }
-.ProseMirror a:hover { color: var(--color-accent); background: var(--color-accent-soft); }
-.ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--color-ink-3); float: left; height: 0; pointer-events: none; }
-.ProseMirror em { color: var(--color-ink-3); }
+.ProseMirror ul[data-type="taskList"] input { accent-color: var(--ink); }
+.ProseMirror blockquote { border-left: 2px solid var(--line-strong); padding-left: 0.9em; color: var(--ink-muted); margin: 0.5em 0; }
+.ProseMirror code { font-family: var(--font-mono); font-size: 0.88em; background: var(--paper-sunken); padding: 0.1em 0.3em; border-radius: 4px; }
+/* Timestamp links are CitationChips (design/components/CitationChip). */
+.ProseMirror a { display: inline-flex; align-items: center; height: 20px; padding: 0 6px; border-radius: var(--radius-sm); background: var(--malt-tint); color: var(--malt-ink); font: 500 11px/16px var(--font-mono); text-decoration: none; vertical-align: 2px; }
+.ProseMirror a:hover { background: var(--malt); color: var(--on-malt); }
+.ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--ink-subtle); float: left; height: 0; pointer-events: none; }
+.ProseMirror em { color: var(--ink-muted); }
 
-/* Enhanced notes: AI-written text is a shade lighter than the user's own words. */
-.enhanced .ProseMirror { color: var(--color-ink-ai); }
-.enhanced .ProseMirror h2 { color: var(--color-ink); }
+/* Enhanced notes use the reading face: note-body and note-heading. */
+.enhanced .ProseMirror { font: 400 16px/26px var(--font-serif); }
+.enhanced .ProseMirror :is(h1, h2) { font: 600 19px/26px var(--font-serif); letter-spacing: 0; }
+.enhanced .ProseMirror h3 { font: 600 16px/26px var(--font-serif); }
 
 @media print {
   body { overflow: visible; background: white; }
@@ -108,5 +112,5 @@ mark { background: var(--color-highlight); color: inherit; border-radius: 2px; p
   .print-area { overflow: visible !important; height: auto !important; }
 }
 
-select.bare { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238b8f87' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; padding-right: 20px !important; }
+select.bare { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238C8273' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; padding-right: 20px !important; }
 textarea.title { field-sizing: content; resize: none; overflow: hidden; }

@@ -1,0 +1,72 @@
+/* Copied from design/components/bundle.css without its Google Fonts import and body rule: fonts are bundled (offline is a promise). Keep in sync. */
+
+/* ---------- Button ---------- */
+.gr-btn { display: inline-flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-4);
+  border-radius: var(--radius-md); border: 1px solid transparent; font: 500 14px/21px var(--font-sans);
+  cursor: pointer; transition: background-color .12s ease, border-color .12s ease; white-space: nowrap; }
+.gr-btn svg { width: 16px; height: 16px; flex: none; }
+.gr-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.gr-btn--primary { background: var(--ink); color: var(--paper); }
+.gr-btn--primary:hover { background: var(--ink-muted); }
+.gr-btn--accent { background: var(--malt); color: var(--on-malt); }
+.gr-btn--accent:hover { background: var(--malt-ink); color: var(--paper); }
+.gr-btn--secondary { background: var(--paper-raised); color: var(--ink); border-color: var(--line-strong); }
+.gr-btn--secondary:hover { background: var(--paper-sunken); }
+.gr-btn--ghost { background: none; color: var(--ink-muted); }
+.gr-btn--ghost:hover { background: var(--paper-sunken); color: var(--ink); }
+.gr-btn--danger { background: var(--paper-raised); color: var(--clay); border-color: var(--clay); }
+.gr-btn--sm { height: 28px; padding: 0 var(--space-3); font-size: 13px; border-radius: var(--radius-sm); }
+.gr-btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* ---------- CitationChip ---------- */
+.gr-cite { display: inline-flex; align-items: center; gap: var(--space-1); height: 20px; padding: 0 6px;
+  border-radius: var(--radius-sm); background: var(--malt-tint); color: var(--malt-ink);
+  font: 500 11px/16px var(--font-mono); text-decoration: none; vertical-align: 2px; cursor: pointer; border: 0; }
+.gr-cite:hover { background: var(--malt); color: var(--on-malt); }
+.gr-cite:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.gr-cite__time { opacity: .85; }
+
+/* ---------- SpeakerLabel ---------- */
+.gr-speaker { display: inline-flex; align-items: center; gap: 6px; font: 600 12px/16px var(--font-sans); letter-spacing: .04em; text-transform: uppercase; }
+.gr-speaker::before { content: ""; width: 3px; height: 12px; border-radius: var(--radius-pill); background: currentColor; }
+.gr-speaker--me { color: var(--speaker-me); }
+.gr-speaker--them { color: var(--speaker-them); }
+.gr-line { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-3); padding: var(--space-2) 0; font: 400 14px/21px var(--font-sans); color: var(--ink); }
+.gr-line__meta { display: flex; flex-direction: column; gap: 2px; }
+.gr-line__time { font: 500 12px/16px var(--font-mono); color: var(--ink-muted); }
+.gr-line--cited { background: var(--malt-tint); border-radius: var(--radius-sm); padding: var(--space-2); margin: 0 calc(-1 * var(--space-2)); }
+
+/* ---------- VerifyBadge ---------- */
+.gr-verify { display: inline-flex; align-items: center; gap: var(--space-1); height: 22px; padding: 0 var(--space-2);
+  border-radius: var(--radius-sm); font: 500 12px/16px var(--font-sans); }
+.gr-verify svg { width: 14px; height: 14px; }
+.gr-verify--found { background: var(--sprout-tint); color: var(--sprout); }
+.gr-verify--missing { background: var(--clay-tint); color: var(--clay); }
+.gr-verify--local { background: var(--paper-sunken); color: var(--ink-muted); }
+
+/* ---------- ActionItem ---------- */
+.gr-action { display: grid; grid-template-columns: 20px 1fr; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--line); }
+.gr-action:first-child { border-top: 0; }
+.gr-action__check { width: 18px; height: 18px; margin-top: 4px; border: 1.5px solid var(--line-strong); border-radius: 5px; background: var(--paper-raised); appearance: none; cursor: pointer; }
+.gr-action__check:checked { background: var(--ink); border-color: var(--ink); }
+.gr-action__check:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.gr-action__text { font: 400 16px/26px var(--font-serif); color: var(--ink); }
+.gr-action__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-1); font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+.gr-action__owner { font-weight: 600; color: var(--ink); }
+.gr-action__struck { text-decoration: line-through; text-decoration-color: var(--clay); color: var(--ink-muted); }
+
+/* ---------- RecordingPill ---------- */
+.gr-rec { display: inline-flex; align-items: center; gap: var(--space-3); height: 40px; padding: 0 var(--space-2) 0 var(--space-4);
+  border-radius: var(--radius-pill); background: var(--paper-raised); border: 1px solid var(--line); box-shadow: var(--shadow-raised);
+  font: 500 14px/21px var(--font-sans); color: var(--ink); }
+.gr-rec__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--rec); box-shadow: 0 0 0 4px var(--clay-tint); }
+.gr-rec__time { font: 500 13px/16px var(--font-mono); color: var(--ink-muted); }
+.gr-rec__wave { display: inline-flex; align-items: center; gap: 3px; height: 20px; }
+.gr-rec__wave i { display: block; width: 3px; border-radius: var(--radius-pill); background: var(--ink-subtle); }
+.gr-rec__wave i.on { background: var(--malt); }
+.gr-rec__stop { width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--ink); display: grid; place-items: center; cursor: pointer; }
+.gr-rec__stop::before { content: ""; width: 10px; height: 10px; border-radius: 2px; background: var(--paper); }
+.gr-rec__stop:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.gr-rec--paused .gr-rec__dot { background: var(--ink-subtle); box-shadow: none; }
+@media (prefers-reduced-motion: no-preference) { .gr-rec__dot { animation: gr-pulse 1.6s ease-in-out infinite; } }
+@keyframes gr-pulse { 50% { opacity: .45; } }

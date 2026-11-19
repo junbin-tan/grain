@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowLeft, AudioLines, RefreshCw, Download, Flag, MessageCircle, Mic, MonitorSpeaker, MoreHorizontal, Pause, Play, RotateCcw, Sparkles, Square, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, AudioLines, Captions, RefreshCw, Download, Flag, MessageCircle, Mic, MoreHorizontal, Pause, Play, RotateCcw, Trash2, X } from "lucide-react";
 import { confirm } from "../lib/dialogs";
 import { api, on, type MeetingDetail, type Segment, type Template } from "../lib/api";
 import { fmtDate, fmtDuration, fmtTime, fmtTs } from "../lib/format";
@@ -9,7 +9,7 @@ import { TranscriptView } from "../components/Transcript";
 import { EnhancedView, useEnhance } from "../components/EnhancedView";
 import { AskPanel } from "../components/AskPanel";
 import { ExportDialog } from "../components/ExportDialog";
-import { Badge, Banner, Button, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner } from "../components/ui";
+import { Badge, Banner, Button, GrainMark, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner } from "../components/ui";
 
 export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab; at?: number }) {
   const { recording, processing, navigate, back, refreshMeetings, startRecording, settings, catalog, toast } = useApp();
@@ -44,7 +44,8 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
     if (t === (detail?.meeting.title ?? "")) return;
     return api.updateMeeting(id, { title: t }).then(() => { if (refresh) { load(); } refreshMeetings(); });
   };
-  useEffect(fitTitle, [detail?.meeting.title]);
+  // Re-measure once the bundled serif loads: the fallback font is wider and would leave a two-line box.
+  useEffect(() => { fitTitle(); document.fonts.ready.then(fitTitle); }, [detail?.meeting.title]);
 
   // A transcript without notes usually means Enhance is next: load the model now, not on click.
   useEffect(() => { if (detail && detail.segments.length > 0 && !detail.enhanced) api.warmModels().catch(() => {}); }, [detail?.meeting.id, !!detail?.enhanced, (detail?.segments.length ?? 0) > 0]);
@@ -123,8 +124,8 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
 
   const tabBtn = (t: Tab, label: string, count?: number) => (
     <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-      className={`relative h-9 px-0.5 text-[13px] font-medium transition-colors ${tab === t ? "text-ink" : "text-ink-3 hover:text-ink-2"}`}>
-      {label}{count != null && count > 0 && <span className="ml-1 text-ink-3">{count}</span>}
+      className={`relative h-9 px-0.5 text-[13px] font-medium transition-colors ${tab === t ? "text-ink" : "text-ink-subtle hover:text-ink-muted"}`}>
+      {label}{count != null && count > 0 && <span className="ml-1 text-ink-subtle">{count}</span>}
       {tab === t && <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-ink" />}
     </button>
   );
@@ -134,7 +135,7 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
       <div className="relative flex min-w-0 flex-1 flex-col">
         <header className="drag no-print flex h-[52px] shrink-0 items-center gap-1 px-3">
           <IconButton className="no-drag" label="Back" onClick={back}><ArrowLeft className="size-4" /></IconButton>
-          <div className="truncate px-1 text-[12.5px] text-ink-3">Meetings / <span className="text-ink-2">{m.title || "Untitled meeting"}</span></div>
+          <div className="truncate px-1 text-[12.5px] text-ink-subtle">Meetings / <span className="text-ink-muted">{m.title || "Untitled meeting"}</span></div>
           <div className="flex-1" />
           <div className="no-drag flex items-center gap-1">
             <Button size="sm" variant="ghost" onClick={() => setSide((s) => (s === "ask" ? "none" : "ask"))}><MessageCircle className="size-3.5" />Ask</Button>
@@ -157,32 +158,32 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
               onInput={(e) => { fitTitle(); const v = (e.target as HTMLTextAreaElement).value; window.clearTimeout(titleTimer.current); titleTimer.current = window.setTimeout(() => saveTitle(v, false), 500); }}
               onBlur={(e) => saveTitle(e.target.value, true)}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); } }}
-              className="title mt-3 block w-full bg-transparent font-serif text-[30px] leading-[1.2] font-semibold tracking-[-0.01em] outline-none placeholder:text-ink-3" />
-            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+              className="title mt-3 block w-full bg-transparent outline-none placeholder:text-ink-subtle" />
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-subtle">
               <span>{fmtDate(m.startedAt ?? m.createdAt)} · {fmtTime(m.startedAt ?? m.createdAt)}</span>
               {m.durationMs > 0 && <span>· {fmtDuration(m.durationMs)}</span>}
               <span>·</span>
               <select aria-label="Note template" value={m.templateId} onChange={(e) => api.updateMeeting(id, { templateId: e.target.value }).then(load)}
-                className="bare h-6 rounded-[6px] bg-transparent px-1.5 text-[12.5px] text-ink-2 outline-none hover:bg-wash">
+                className="bare h-6 rounded-sm bg-transparent px-1.5 text-[12.5px] text-ink-muted outline-none hover:bg-paper-sunken">
                 {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
-              {isRecording && <Badge tone="rec"><RecDot pulse={!recording?.paused} className="size-1.5" />{recording?.paused ? "Paused" : "Recording"}</Badge>}
-              {busy && <Badge tone="accent"><Spinner className="size-3 text-accent" />{busy}</Badge>}
+              {isRecording && <Badge tone="clay"><RecDot pulse={!recording?.paused} className="size-1.5" />{recording?.paused ? "Paused" : "Recording"}</Badge>}
+              {busy && <Badge><Spinner className="size-3" />{busy}</Badge>}
             </div>
 
             <div className="mt-4 flex flex-col gap-2 empty:hidden">
               {m.status === "interrupted" && !isRecording && (
-                <Banner tone="warn" icon={<AlertTriangle className="size-4" />}
+                <Banner tone="clay" icon={<AlertTriangle className="size-4" />}
                   action={hasAudio && <Button size="sm" onClick={retranscribe} disabled={!asrReady}>Transcribe audio</Button>}>
                   This recording was interrupted. {fmtDuration(m.durationMs) || "Some"} of audio was saved{detail.segments.length ? " and partly transcribed" : ""}.
                 </Banner>
               )}
               {!asrReady && (isRecording || hasAudio) && (
-                <Banner tone="warn" icon={<AlertTriangle className="size-4" />} action={<Button size="sm" onClick={() => navigate({ name: "models", role: "asr" })}>Get a speech model</Button>}>
+                <Banner tone="clay" icon={<AlertTriangle className="size-4" />} action={<Button size="sm" onClick={() => navigate({ name: "models", role: "asr" })}>Get a speech model</Button>}>
                   No speech model installed. Audio is being kept; transcribe it after downloading a model.
                 </Banner>
               )}
-              {recording?.warnings.length && isRecording ? <Banner tone="warn" icon={<AlertTriangle className="size-4" />}>{recording.warnings.join(" · ")}</Banner> : null}
+              {recording?.warnings.length && isRecording ? <Banner tone="clay" icon={<AlertTriangle className="size-4" />}>{recording.warnings.join(" · ")}</Banner> : null}
             </div>
 
             <div role="tablist" className="no-print mt-4 flex gap-5 border-b border-line">
@@ -242,45 +243,48 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, sid
     <div className="no-print pointer-events-none absolute inset-x-0 bottom-5 flex justify-center">
       <div className="pointer-events-auto flex flex-col items-center gap-2">
         {isRecording && r ? (
-          <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-raised py-1 pr-1.5 pl-4 shadow-[var(--shadow-float)]" role="status" aria-label="Recording controls">
-            <RecDot pulse={!r.paused} className={`mr-1 size-2.5 ${r.paused ? "opacity-40" : ""}`} />
-            <span className="w-[54px] text-[13px] font-medium tabular-nums">{fmtTs(r.elapsed * 1000)}</span>
-            <span className={`flex items-center gap-1 px-1.5 ${r.micOn ? "text-accent" : "text-ink-3"}`} title={r.micOn ? `Microphone: ${r.micDevice}` : "Microphone off"}>
+          <div className={`gr-rec animate-rise ${r.paused ? "gr-rec--paused" : ""}`} role="status" aria-label="Recording controls">
+            <span className="gr-rec__dot" />
+            <span className="w-[66px]">{r.paused ? "Paused" : "Recording"}</span>
+            <span className="gr-rec__time w-[44px]">{fmtTs(r.elapsed * 1000)}</span>
+            <span className={`flex items-center gap-1 ${r.micOn ? "text-speaker-me" : "text-ink-subtle"}`} title={r.micOn ? `Me: ${r.micDevice}` : "Microphone off"}>
               <Mic className="size-3.5" /><LevelBars level={r.mic} active={r.micOn && !r.paused} />
             </span>
-            <span className={`flex items-center gap-1 px-1.5 ${r.systemOn ? "text-them" : "text-ink-3"}`} title={r.systemOn ? "System audio" : "System audio off"}>
-              <MonitorSpeaker className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
+            <span className={`flex items-center gap-1 ${r.systemOn ? "text-speaker-them" : "text-ink-subtle"}`} title={r.systemOn ? "Them: computer audio" : "Computer audio off"}>
+              <AudioLines className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
             </span>
-            <div className="mx-1 h-6 w-px bg-line" />
-            <IconButton label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-4" /></IconButton>
-            <IconButton label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-4" /> : <Pause className="size-4" />}</IconButton>
-            <IconButton label="Live transcript" active={side === "live"} onClick={() => setSide(side === "live" ? "none" : "live")}><AudioLines className="size-4" /></IconButton>
-            <Button variant="rec" className="ml-1" onClick={() => api.stopRecording()}><Square className="size-3 fill-current text-rec" />Stop</Button>
+            <div className="h-5 w-px bg-line" />
+            <div className="flex">
+              <IconButton label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-4" /></IconButton>
+              <IconButton label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-4" /> : <Pause className="size-4" />}</IconButton>
+              <IconButton label="Live transcript" active={side === "live"} onClick={() => setSide(side === "live" ? "none" : "live")}><Captions className="size-4" /></IconButton>
+            </div>
+            <button className="gr-rec__stop" aria-label="Stop recording (⌘R)" title="Stop recording (⌘R)" onClick={() => api.stopRecording()} />
           </div>
         ) : enhance.stage ? (
-          <div className="flex h-11 animate-rise items-center gap-2 rounded-full border border-line bg-raised px-4 text-[13px] text-ink-2 shadow-[var(--shadow-float)]">
-            <Sparkles className="size-4 animate-pulse text-accent" /> Enhancing notes on this Mac…
+          <div className="flex h-11 animate-rise items-center gap-2 rounded-full border border-line bg-paper-raised px-4 text-[13px] text-ink-muted shadow-[var(--shadow-raised)]">
+            <GrainMark className="size-4" /> Enhancing notes on this Mac…
           </div>
         ) : neverRecorded ? (
           <>
-            <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-raised p-1.5 pl-2 shadow-[var(--shadow-float)]">
+            <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-paper-raised p-1.5 pl-2 shadow-[var(--shadow-raised)]">
               <button onClick={() => setSetting("captureSystem", settings.captureSystem === false)} title="Include computer audio (the other people on your call)"
-                className={`flex h-8 items-center gap-1.5 rounded-full px-3 text-[12.5px] ${settings.captureSystem !== false ? "bg-wash text-ink" : "text-ink-3 line-through"}`}>
-                <MonitorSpeaker className="size-3.5" />Computer audio
+                className={`flex h-8 items-center gap-1.5 rounded-md px-3 text-[12.5px] ${settings.captureSystem !== false ? "bg-paper-sunken text-ink" : "text-ink-subtle line-through"}`}>
+                <AudioLines className="size-3.5" />Computer audio
               </button>
-              <span className={`flex h-8 items-center gap-1.5 px-2 text-[12.5px] ${settings.micDevice === "none" ? "text-ink-3 line-through" : "text-ink-2"}`} title={settings.micDevice === "none" ? "Microphone is off (Settings › Audio)" : "Microphone"}><Mic className="size-3.5" />Mic</span>
-              <RecordButton loading={starting} onClick={record}>Start recording <span className="text-white/60">⌘R</span></RecordButton>
+              <span className={`flex h-8 items-center gap-1.5 px-2 text-[12.5px] ${settings.micDevice === "none" ? "text-ink-subtle line-through" : "text-ink-muted"}`} title={settings.micDevice === "none" ? "Microphone is off (Settings › Audio)" : "Microphone"}><Mic className="size-3.5" />Mic</span>
+              <RecordButton loading={starting} onClick={record}>Start recording <span className="opacity-60">⌘R</span></RecordButton>
             </div>
-            <div className="text-[11.5px] text-ink-3">Tell everyone you're recording. Consent rules vary by place. Audio stays on this Mac.</div>
+            <div className="text-[11.5px] text-ink-subtle">Tell everyone you're recording. Consent rules vary by place. Audio stays on this Mac.</div>
           </>
         ) : (
-          <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-raised p-1.5 shadow-[var(--shadow-float)]">
+          <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-paper-raised p-1.5 shadow-[var(--shadow-raised)]">
             <RecordButton variant="ghost" onClick={record} disabled={!!busy}>Resume recording</RecordButton>
             {hasEnhanced && onEnhancedTab ? (
-              <Button variant="primary" disabled={!!busy} onClick={() => enhance.run()}><RefreshCw className="size-3.5" />Regenerate</Button>
+              <Button variant="accent" disabled={!!busy} onClick={() => enhance.run()}><RefreshCw />Regenerate</Button>
             ) : (
-              <Button variant="primary" disabled={!hasInput || !!busy} onClick={() => (hasEnhanced ? setTab("enhanced") : enhance.run())}>
-                <Sparkles className="size-4" />{hasEnhanced ? "View enhanced notes" : "Enhance notes"} {!hasEnhanced && <Kbd>⌘E</Kbd>}
+              <Button variant={hasEnhanced ? "primary" : "accent"} disabled={!hasInput || !!busy} onClick={() => (hasEnhanced ? setTab("enhanced") : enhance.run())}>
+                {!hasEnhanced && <GrainMark mono />}{hasEnhanced ? "View enhanced notes" : "Enhance notes"} {!hasEnhanced && <Kbd>⌘E</Kbd>}
               </Button>
             )}
           </div>

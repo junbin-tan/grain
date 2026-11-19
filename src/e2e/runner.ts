@@ -147,7 +147,7 @@ async function phase1() {
   });
   await step("onboarding: download recommended models (verifies existing files, SHA-256)", async () => {
     await waitFor(() => findText("Download your models"), "models step");
-    const card = (name: string) => $("div").find((d) => d.className.includes("rounded-[10px]") && findText(name, d) && d.querySelector("button, span"));
+    const card = (name: string) => $("div").find((d) => d.className.includes("rounded-md border") && findText(name, d) && d.querySelector("button, span"));
     const t0 = now();
     for (const name of ["Parakeet Unified English 0.6B", "Qwen3 4B Instruct (2507)", "Qwen3 Embedding 0.6B"]) {
       const c = await waitFor(() => card(name), name);
@@ -186,7 +186,7 @@ async function phase1() {
     await waitFor(() => (byLabel("Microphone") as HTMLSelectElement).value === "none", "mic off");
   });
   await step("settings: create, edit and list a custom template", async () => {
-    await clickText("AI notes & templates", document.querySelector("nav")!);
+    await clickText("Notes & templates", document.querySelector("nav")!);
     await clickText("New template");
     setValue(await waitFor(() => $("input[placeholder^='Template name']")[0] as HTMLInputElement, "name"), "E2E Standup");
     setValue($("textarea[placeholder^='What should the notes focus on']")[0] as HTMLTextAreaElement, "Yesterday, today, blockers. List owners.");
@@ -240,7 +240,7 @@ async function phase1() {
   });
   await step("stop → transcript finalised", async () => {
     const t0 = now();
-    await clickText(/^Stop$/);
+    await click(byLabel("Stop recording (⌘R)"), "Stop");
     await waitFor(() => byText(/Enhance notes/) && !(byText(/Enhance notes/) as HTMLButtonElement).disabled, "ready to enhance", 60000);
     metrics.stopToReadyMs = Math.round(now() - t0);
     await click(tab("Transcript")!, "transcript tab");
@@ -271,7 +271,7 @@ async function phase1() {
     const a = await waitFor(() => document.querySelector(".enhanced .ProseMirror a[href^='#t=']") as HTMLElement, "source link");
     await click(a, "timestamp");
     await waitFor(() => tab("Transcript")?.getAttribute("aria-selected") === "true", "transcript tab selected");
-    await waitFor(() => main().querySelector("span.bg-highlight"), "highlighted line");
+    await waitFor(() => main().querySelector(".gr-line--cited"), "highlighted line");
     await click(tab("Enhanced")!, "back to enhanced");
   });
   await step("toggle an action item done", async () => {
@@ -493,7 +493,7 @@ async function phase1() {
   // ---------- Settings sections & shortcuts ----------
   await step("settings: every section renders", async () => {
     await nav("Settings", heading("General"));
-    for (const s of ["Audio", "Transcription", "AI notes & templates", "Search", "Privacy & data", "Keyboard shortcuts", "About", "General"]) {
+    for (const s of ["Audio", "Transcription", "Notes & templates", "Search", "Privacy & data", "Keyboard shortcuts", "About", "General"]) {
       await clickText(s, document.querySelector("nav")!);
       await waitFor(heading(s), s);
     }

@@ -18,14 +18,14 @@ export function ChatPage({ threadId }: { threadId?: string }) {
         <div className="drag flex h-[52px] items-center px-3">
           <Button size="sm" className="no-drag w-full" onClick={() => { setActive(null); setKey((k) => k + 1); }}><Plus className="size-3.5" />New chat</Button>
         </div>
-        <div className="px-3 pb-1 text-[11px] font-medium tracking-[0.04em] text-ink-3 uppercase">History</div>
+        <div className="px-3 pb-1 text-[11px] font-medium tracking-[0.04em] text-ink-subtle uppercase">History</div>
         <div className="scroll-y flex-1 px-2">
-          {threads.length === 0 && <div className="px-2 py-1 text-[12.5px] text-ink-3">No chats yet</div>}
+          {threads.length === 0 && <div className="px-2 py-1 text-[12.5px] text-ink-subtle">No chats yet</div>}
           {threads.map((t) => (
-            <div key={t.id} className={`group flex items-center rounded-[7px] ${active === t.id ? "bg-wash" : "hover:bg-wash"}`}>
+            <div key={t.id} className={`group flex items-center rounded-md ${active === t.id ? "bg-paper-sunken" : "hover:bg-paper-sunken"}`}>
               <button onClick={() => setActive(t.id)} className="min-w-0 flex-1 px-2 py-1.5 text-left">
                 <div className="truncate text-[12.5px] text-ink">{t.title}</div>
-                <div className="text-[11px] text-ink-3">{relTime(t.createdAt)}</div>
+                <div className="text-[11px] text-ink-subtle">{relTime(t.createdAt)}</div>
               </button>
               <IconButton label="Delete chat" className="opacity-0 group-hover:opacity-100" onClick={async () => { await api.deleteThread(t.id); if (active === t.id) setActive(null); load(); }}><Trash2 className="size-3.5" /></IconButton>
             </div>
@@ -36,7 +36,7 @@ export function ChatPage({ threadId }: { threadId?: string }) {
         <div className="drag h-[52px] shrink-0" />
         <div className="min-h-0 flex-1">
           <AskPanel key={`${active ?? "new"}-${key}`} threadId={active} onThread={(id) => { setActive(id); load(); }}
-            header={<h1 className="mx-auto w-full max-w-[680px] px-4 font-serif text-[26px] font-semibold">Ask Grain</h1>} />
+            header={<h1 className="mx-auto w-full max-w-[680px] px-4 title">Ask Grain</h1>} />
         </div>
       </div>
     </div>

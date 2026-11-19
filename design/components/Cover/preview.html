@@ -1,0 +1,26 @@
+<!-- @dsCard height=288 -->
+<div id="root" class="cv">
+<style>
+.cv{position:relative;width:960px;height:288px;background:var(--paper);overflow:hidden}
+.cv svg{position:absolute;inset:0}
+.ink{fill:var(--ink)} .malt{fill:var(--malt)} .tint{fill:var(--malt-tint)} .sprout{fill:var(--sprout)}
+.paper-s{stroke:var(--paper)} .malt-s{stroke:var(--malt)}
+.r-lg{rx:var(--radius-lg)} .r-sm{rx:var(--radius-sm)}
+.cv-text{position:absolute;left:48px;bottom:44px;max-width:440px}
+.cv-name{font:500 120px/0.92 var(--font-serif);letter-spacing:-0.03em;color:var(--ink);margin:0}
+.cv-tag{font:400 14px/20px var(--font-sans);color:var(--ink-muted);margin:16px 0 0}
+</style>
+<svg width="960" height="288" viewBox="0 0 960 288" aria-hidden="true">
+<!-- blocks: ink (soil) slab 304x320 bleeding top/bottom, malt 96x128, malt-tint 96x112, sprout 32x32; radius-lg on ink and malt, radius-sm on sprout -->
+<!-- arrangement: one tall slab with satellites, flush right and bleeding off the top, bottom and right edges -->
+<!-- pattern row: literal motif. The README's kernel: seven radius-pill bars cut out of the slab in paper, the centre one in malt (the cited moment) -->
+<!-- scales: space-4 (16) gutters between blocks, space-6 (24) inset, radius-lg 16, radius-sm 6, radius-pill bars -->
+<rect class="tint r-lg" x="504" y="24" width="96" height="112"/>
+<rect class="malt r-lg" x="504" y="152" width="96" height="160"/>
+<rect class="sprout r-sm" x="568" y="-8" width="32" height="16"/>
+<rect class="ink r-lg" x="616" y="-16" width="360" height="320"/>
+<line class="paper-s" x1="686.4" y1="194.3" x2="698.8" y2="219.6" stroke-width="22.8" stroke-linecap="round"/><line class="paper-s" x1="709.3" y1="150.3" x2="742.2" y2="217.8" stroke-width="22.8" stroke-linecap="round"/><line class="paper-s" x1="738.1" y1="118.5" x2="781.8" y2="208.1" stroke-width="22.8" stroke-linecap="round"/><line class="malt-s" x1="771.7" y1="96.4" x2="818.8" y2="193.1" stroke-width="22.8" stroke-linecap="round"/><line class="paper-s" x1="809.7" y1="83.6" x2="853.4" y2="173.2" stroke-width="22.8" stroke-linecap="round"/><line class="paper-s" x1="852.5" y1="80.4" x2="885.4" y2="147.9" stroke-width="22.8" stroke-linecap="round"/><line class="paper-s" x1="901.2" y1="89.5" x2="913.6" y2="114.8" stroke-width="22.8" stroke-linecap="round"/>
+</svg>
+<div class="cv-text"><h1 class="cv-name">Grain</h1><p class="cv-tag">A private AI notepad for meetings. On your Mac, with a source for every note.</p></div>
+</div>
+<script>/* static cover */</script>
