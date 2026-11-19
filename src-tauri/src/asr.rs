@@ -106,8 +106,22 @@ fn run_job(loaded: &mut Option<(PathBuf, Model, transcribe_cpp::Session)>, job: 
     let detects = caps.as_ref().map(|c| c.supports_language_detect).unwrap_or(false);
     let language = pick_language(&job.languages, &supported, detects);
     let opts = RunOptions { language: language.clone(), ..Default::default() };
-    let t = session.run(&job.pcm, &opts).map_err(|e| anyhow!("Transcription failed: {e}"))?;
-    let lang = t.language.clone().or(language);
+    let mut t = session.run(&job.pcm, &opts).map_err(|e| anyhow!("Transcription failed: {e}"))?;
+    let mut lang = t.language.clone().or(language.clone());
+    // Auto-detect keeps short English chunks English but, when a chunk is mostly English,
+    // translates the CJK sentences in it. A CJK hint keeps those, but translates short
+    // English-only chunks into CJK. So when auto-detect found no CJK, retry with the hint
+    // and keep that result only if it is genuinely mixed (it kept the English words).
+    if language.is_none() && !t.text.chars().any(is_cjk) {
+        if let Some(cjk) = job.languages.iter().find(|l| KEEP_MIXED.contains(&l.as_str()) && supported.contains(l)) {
+            if let Ok(t2) = session.run(&job.pcm, &RunOptions { language: Some(cjk.clone()), ..Default::default() }) {
+                if kept_as_spoken(&t.text, &t2.text) {
+                    t = t2;
+                    lang = Some(cjk.clone());
+                }
+            }
+        }
+    }
     let dur = (job.pcm.len() * 1000 / RATE) as i64;
     let words: Vec<(i64, i64, String)> = t.words.iter().filter(|w| w.t1_ms > 0).map(|w| (w.t0_ms, w.t1_ms, w.text.clone())).collect();
     let mut out: Vec<Piece> = if !words.is_empty() {
@@ -124,6 +138,17 @@ fn run_job(loaded: &mut Option<(PathBuf, Model, transcribe_cpp::Session)>, job: 
         out.push(Piece { start_ms: 0, end_ms: dur, text: t.text.trim().to_string(), language: lang });
     }
     Ok(out)
+}
+
+fn latin_words(s: &str) -> usize {
+    s.split(|c: char| !c.is_ascii_alphabetic()).filter(|w| !w.is_empty()).count()
+}
+
+/// True if `hinted` (a CJK-hinted run) holds CJK speech that `auto` translated away,
+/// rather than being a CJK translation of English speech: it kept most English words
+/// and has a real CJK phrase, not a single translated word like "或" for "Or".
+fn kept_as_spoken(auto: &str, hinted: &str) -> bool {
+    hinted.chars().filter(|c| is_cjk(*c)).count() >= 4 && latin_words(hinted) * 2 >= latin_words(auto)
 }
 
 fn is_cjk(c: char) -> bool {
@@ -162,7 +187,8 @@ pub fn sentences(words: &[(i64, i64, String)]) -> Vec<(i64, i64, String)> {
 
 /// Languages for which a hint keeps mixed English speech in place: with an English
 /// hint (or English auto-detected), Qwen3-ASR was observed translating the other
-/// language into English; with a Chinese hint it kept both languages as spoken.
+/// language into English; with a Chinese hint it kept both languages as spoken, but
+/// translated short English-only chunks into Chinese (see `run_job`).
 const KEEP_MIXED: &[&str] = &["zh", "yue", "ja", "ko"];
 
 /// The language hint to pass: a single preferred language the model supports; otherwise
@@ -172,7 +198,8 @@ pub fn pick_language(preferred: &[String], supported: &[String], detects: bool) 
     if preferred.len() == 1 && usable.len() == 1 {
         return Some(usable[0].clone());
     }
-    if usable.len() > 1 {
+    // Models that detect language auto-detect; `run_job` retries with the CJK hint.
+    if usable.len() > 1 && !detects {
         if let Some(l) = usable.iter().find(|l| KEEP_MIXED.contains(&l.as_str())) {
             return Some((*l).clone());
         }
@@ -210,7 +237,11 @@ pub fn asr_config(core: &Core) -> Result<(String, PathBuf, Vec<String>)> {
 
 /// Transcribe one chunk of one track and store the resulting segments.
 async fn transcribe_piece(core: &Arc<Core>, meeting_id: &str, source: &str, has_both: bool, path: &Path, from: usize, to: usize, cfg: &(String, PathBuf, Vec<String>)) -> Result<usize> {
-    let pcm = audio::read_pcm(path, from, to)?;
+    let mut pcm = audio::read_pcm(path, from, to)?;
+    if source == "mic" && has_both {
+        let system = audio::read_pcm(&path.with_file_name("system.pcm"), from, to)?;
+        audio::suppress_echo(&mut pcm, &system);
+    }
     if audio::speech_seconds(&pcm) < 0.3 {
         return Ok(0); // silence: skip (prevents hallucinated text on quiet tracks)
     }
@@ -360,8 +391,10 @@ mod tests {
     fn language_hint() {
         // single preferred, supported -> force it
         assert_eq!(pick_language(&v(&["zh"]), &v(&["en", "zh"]), true), Some("zh".into()));
-        // English + Chinese: hint Chinese so mixed speech is not translated into English
-        assert_eq!(pick_language(&v(&["en", "zh"]), &v(&["en", "zh"]), true), Some("zh".into()));
+        // English + Chinese, detecting model: auto-detect (run_job retries with the zh hint)
+        assert_eq!(pick_language(&v(&["en", "zh"]), &v(&["en", "zh"]), true), None);
+        // English + Chinese, non-detecting model: hint Chinese so Chinese is not translated
+        assert_eq!(pick_language(&v(&["en", "zh"]), &v(&["en", "zh"]), false), Some("zh".into()));
         // English + Malay with detection -> autodetect
         assert_eq!(pick_language(&v(&["en", "ms"]), &v(&["en", "ms"]), true), None);
         // english-only model
@@ -370,6 +403,18 @@ mod tests {
         assert_eq!(pick_language(&v(&["fr", "en"]), &v(&["en", "de", "fr"]), false), Some("fr".into()));
         // preference unsupported, no detection -> model default
         assert_eq!(pick_language(&v(&["zh"]), &v(&["en", "de"]), false), Some("en".into()));
+    }
+
+    #[test]
+    fn mixed_retry_choice() {
+        // Outputs observed from Qwen3-ASR 1.7B on real and synthetic clips.
+        let auto_mixed = "Okay, let's review the launch plan for next week. I think the design part still needs to be changed. Sure, I will send the updated mockups tomorrow.";
+        let zh_mixed = "Okay, let's review the launch plan for next week. 我觉得设计部分还需要再改一下，客户不太满意。 Sure, I will send the updated mockups tomorrow.";
+        assert!(super::kept_as_spoken(auto_mixed, zh_mixed));
+        let auto_en = "Or how the application should actually work, the AI will do all of that for you.";
+        assert!(!super::kept_as_spoken(auto_en, "或如何应用应该实际工作，AI将做所有这些对于你。"));
+        assert!(!super::kept_as_spoken("It will generate an image.", "它将生成一个。"));
+        assert!(!super::kept_as_spoken("Or just skip all that.", "或，just skip all that."));
     }
 
     #[test]

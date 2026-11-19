@@ -42,7 +42,7 @@ There are three categories, kept separate on purpose:
 
 Published per-language FLEURS error rates from transcribe.cpp are shown as grades in the model manager. They are **not** Grain measurements. Examples: Qwen3-ASR 1.7B Malay 10.4%, Cantonese 6.1%; Whisper large-v3-turbo Cantonese 34.6%.
 
-**Language-hint policy (measured, not assumed):** with an English hint, or English auto-detected, Qwen3-ASR translated Mandarin into English. With no hint or a Chinese hint it kept both languages. So when a user's languages include English plus zh/yue/ja/ko, Grain hints the CJK language; otherwise it auto-detects. This was measured on synthetic, sentence-level switching only. Mid-sentence switching (e.g. "这个 deadline 太 tight 了") was **not** tested.
+**Language-hint policy (measured, not assumed):** with an English hint, or English auto-detected, Qwen3-ASR translated Mandarin sentences into English. With a Chinese hint, Qwen3-ASR 1.7B translated short English-only chunks into Chinese (seen in real meetings). So for English plus zh/yue/ja/ko with a model that detects language, Grain auto-detects first. If the result has no CJK, it retries with the CJK hint and keeps that result only if it kept most of the English words and has a real CJK phrase. Models that can't detect language get the CJK hint. Retried chunks cost two passes.
 
 ## Language models (llama.cpp `llama-server`, Metal, bundled build tag v1.0.0)
 

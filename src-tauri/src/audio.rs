@@ -60,6 +60,82 @@ pub fn speech_seconds(pcm: &[f32]) -> f32 {
     rms.iter().filter(|r| **r > th).count() as f32 * FRAME as f32 / RATE as f32
 }
 
+fn db(x: f32) -> f32 {
+    20.0 * x.max(1e-5).log10()
+}
+
+fn corr(a: &[f32], b: &[f32]) -> f32 {
+    let n = a.len().min(b.len()) as f32;
+    let (ma, mb) = (a.iter().sum::<f32>() / n, b.iter().sum::<f32>() / n);
+    let (mut ab, mut aa, mut bb) = (0.0, 0.0, 0.0);
+    for (x, y) in a.iter().zip(b) {
+        ab += (x - ma) * (y - mb);
+        aa += (x - ma) * (x - ma);
+        bb += (y - mb) * (y - mb);
+    }
+    if aa < 1e-6 || bb < 1e-6 { 0.0 } else { ab / (aa * bb).sqrt() }
+}
+
+/// Silence the parts of a mic chunk that are only the call coming back through the
+/// speakers, so they are not transcribed as "Me". Works on loudness envelopes, so it
+/// does not care what language is spoken or how differently the two tracks transcribe.
+/// Measured on real recordings: speaker echo sits ~15–20 dB below the system track
+/// and follows it closely (envelope correlation ~0.9); the user's own voice does not.
+/// With headphones there is no echo and nothing is removed.
+pub fn suppress_echo(mic: &mut [f32], system: &[f32]) {
+    const MAX_LAG: isize = 20; // ±600 ms: the two capture paths are not sample-aligned
+    const WIN: usize = 33; // ~1 s
+    const ACTIVE_DB: f32 = -45.0;
+    const MARGIN_DB: f32 = 10.0; // echo peaks reach ~6 dB above its typical level
+    let floor = |x: f32| db(x).max(-60.0); // so silence padding cannot dominate the statistics
+    let lm: Vec<f32> = frame_rms(mic).into_iter().map(floor).collect();
+    let n = lm.len();
+    let mut ls: Vec<f32> = frame_rms(system).into_iter().map(floor).collect();
+    ls.resize(n, -60.0); // live: the system file may be a little behind
+    let shifted = |lag: isize| -> Vec<f32> { (0..n as isize).map(|i| usize::try_from(i - lag).ok().and_then(|j| ls.get(j)).copied().unwrap_or(-60.0)).collect() };
+    // ~1 s windows where the system track is talking, with how closely the mic follows it.
+    // Judged per window so the user talking over the call does not hide the echo elsewhere.
+    let windows = |s: &[f32]| -> Vec<(usize, f32)> {
+        (0..n / WIN)
+            .map(|w| w * WIN)
+            .filter(|&a| s[a..a + WIN].iter().filter(|x| **x > ACTIVE_DB).count() > WIN / 2)
+            .map(|a| (a, corr(&lm[a..a + WIN], &s[a..a + WIN])))
+            .collect()
+    };
+    let median = |mut v: Vec<f32>| -> Option<f32> {
+        v.sort_by(f32::total_cmp);
+        v.get(v.len() / 2).copied()
+    };
+    let best = (-MAX_LAG..=MAX_LAG).filter_map(|l| median(windows(&shifted(l)).into_iter().map(|w| w.1).collect()).map(|m| (l, m))).max_by(|a, b| a.1.total_cmp(&b.1));
+    let Some((lag, score)) = best else { return };
+    if score < 0.6 {
+        return; // the mic does not follow the system track (e.g. headphones): no echo
+    }
+    // Expected echo level at each mic frame: loudest recent system frame (room reverb
+    // keeps the echo going ~200 ms after the source).
+    let s = shifted(lag);
+    let echo: Vec<f32> = (0..n).map(|i| s[i.saturating_sub(7)..(i + 3).min(n)].iter().copied().fold(-60.0, f32::max)).collect();
+    // Echo gain, learnt only from windows that are clearly echo.
+    let diffs = windows(&s).into_iter().filter(|w| w.1 >= 0.6).flat_map(|(a, _)| a..a + WIN).filter(|&i| echo[i] > ACTIVE_DB).map(|i| lm[i] - echo[i]).collect();
+    let Some(gain) = median(diffs) else { return };
+    let own: Vec<bool> = (0..n).map(|i| lm[i] > echo[i] + gain + MARGIN_DB).collect();
+    // Keep runs of own voice >= 150 ms, padded by 150 ms so word edges survive.
+    let mut keep = vec![false; n];
+    let mut i = 0;
+    while i < n {
+        let j = (i..n).find(|&j| !own[j]).unwrap_or(n);
+        if j - i >= 5 {
+            keep[i.saturating_sub(5)..(j + 5).min(n)].iter_mut().for_each(|k| *k = true);
+        }
+        i = j + 1;
+    }
+    for (f, k) in mic.chunks_mut(FRAME).zip(&keep) {
+        if !k {
+            f.fill(0.0);
+        }
+    }
+}
+
 /// Choose where to end a chunk that starts at pcm[0]: the middle of the latest
 /// pause (>= 300 ms of quiet frames) between `min` and `max` samples. Returns
 /// None if there is no pause in range.
@@ -223,6 +299,29 @@ mod tests {
     fn silence_has_no_speech() {
         assert!(speech_seconds(&vec![0.0; RATE * 5]) < 0.1);
         assert!(speech_seconds(&tone(3.0, 0.2)) > 2.5);
+    }
+
+    #[test]
+    fn speaker_echo_is_silenced_own_voice_kept() {
+        // System: syllable-like bursts (varying loudness) for 6 s, then quiet for 3 s.
+        let mut system = Vec::new();
+        for k in 0..30 {
+            system.extend(tone(0.12, 0.05 + 0.04 * (k % 4) as f32));
+            system.extend(vec![0.0; RATE / 12]);
+        }
+        system.extend(vec![0.0; RATE * 3]);
+        // Mic: the same audio 60 ms later at -18 dB, plus the user speaking at 7–8 s.
+        let delay = RATE * 6 / 100;
+        let mut mic: Vec<f32> = (0..system.len()).map(|i| if i >= delay { system[i - delay] * 0.125 } else { 0.0 }).collect();
+        let user = tone(1.0, 0.1);
+        mic[7 * RATE..8 * RATE].copy_from_slice(&user);
+        let headphones = { let mut m = vec![0.0; system.len()]; m[7 * RATE..8 * RATE].copy_from_slice(&user); m };
+        suppress_echo(&mut mic, &system);
+        assert!(speech_seconds(&mic[..6 * RATE]) < 0.3, "echo left: {}", speech_seconds(&mic[..6 * RATE]));
+        assert!(speech_seconds(&mic[7 * RATE..8 * RATE]) > 0.9);
+        let mut h = headphones.clone();
+        suppress_echo(&mut h, &system);
+        assert_eq!(h, headphones);
     }
 
     #[test]

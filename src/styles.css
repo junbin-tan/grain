@@ -11,13 +11,20 @@
   --color-ink: #1f2420;
   --color-ink-2: #555a53;
   --color-ink-3: #8b8f87;
-  --color-accent: #3f5a36;
-  --color-accent-hover: #34502c;
+  --color-ink-ai: #3a403a; /* AI-written note text: one step lighter than the user's words */
+  /* Each tone is a trio: solid (dots, icons, fills), soft (backgrounds), ink (text on soft, AA contrast). */
+  --color-accent: #3f5a36; /* brand: the app icon tile is exactly this */
   --color-accent-soft: #e6ecdd;
-  --color-rec: #e0483a;
+  --color-accent-ink: #2f4428;
+  --color-rec: #e0483a; /* recording only */
   --color-rec-soft: #fbe5e2;
+  --color-rec-ink: #9b2f24;
   --color-warn: #a86a12;
   --color-warn-soft: #f8ecd6;
+  --color-warn-ink: #7a4d0c;
+  --color-them: #5b4a7a; /* remote speaker */
+  --color-them-soft: #ece7f3;
+  --color-highlight: #f3e6b5;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", "PingFang SC", "Hiragino Sans", "Apple SD Gothic Neo", sans-serif;
   --font-serif: ui-serif, "New York", "Iowan Old Style", Georgia, "Songti SC", serif;
@@ -58,7 +65,7 @@ button { cursor: default; }
 .drag { -webkit-app-region: drag; app-region: drag; }
 .no-drag { -webkit-app-region: no-drag; app-region: no-drag; }
 .scroll-y { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--color-line-strong) transparent; }
-mark { background: #f3e6b5; color: inherit; border-radius: 2px; padding: 0 1px; }
+mark { background: var(--color-highlight); color: inherit; border-radius: 2px; padding: 0 1px; }
 
 .skeleton {
   background: linear-gradient(90deg, var(--color-wash) 0%, #f7f5f0 40%, var(--color-wash) 80%);
@@ -91,7 +98,7 @@ mark { background: #f3e6b5; color: inherit; border-radius: 2px; padding: 0 1px; 
 .ProseMirror em { color: var(--color-ink-3); }
 
 /* Enhanced notes: AI-written text is a shade lighter than the user's own words. */
-.enhanced .ProseMirror { color: #3a403a; }
+.enhanced .ProseMirror { color: var(--color-ink-ai); }
 .enhanced .ProseMirror h2 { color: var(--color-ink); }
 
 @media print {

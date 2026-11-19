@@ -40,7 +40,7 @@ export function LanguagePicker() {
     <div className="flex flex-wrap gap-1.5">
       {PRIORITY_LANGUAGES.map((l) => (
         <button key={l} onClick={() => toggle(l)} aria-pressed={langs.includes(l)}
-          className={`h-7 rounded-full border px-3 text-[12.5px] ${langs.includes(l) ? "border-accent bg-accent-soft text-accent" : "border-line bg-raised text-ink-2 hover:bg-wash"}`}>
+          className={`h-7 rounded-full border px-3 text-[12.5px] ${langs.includes(l) ? "border-accent bg-accent-soft text-accent-ink" : "border-line bg-raised text-ink-2 hover:bg-wash"}`}>
           {langName(l)}
         </button>
       ))}
@@ -73,7 +73,7 @@ export function AudioTest() {
   return (
     <div className="flex items-center gap-4">
       <span className="flex items-center gap-1.5 text-accent"><Mic className="size-4" /><LevelBars level={levels.mic} active={running} bars={7} /></span>
-      <span className="flex items-center gap-1.5 text-[#5b4a7a]"><MonitorSpeaker className="size-4" /><LevelBars level={levels.system} active={running} bars={7} /></span>
+      <span className="flex items-center gap-1.5 text-them"><MonitorSpeaker className="size-4" /><LevelBars level={levels.system} active={running} bars={7} /></span>
       <Button size="sm" onClick={run} loading={running}>{running ? "Listening 5 s…" : "Test audio"}</Button>
       {result && <span className="flex gap-1.5 text-[12px]">Mic {verdict(result.mic)} System {verdict(result.system)}</span>}
     </div>
@@ -245,7 +245,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
 
             {section === "privacy" && (
               <>
-                <div className="mt-5 flex gap-3 rounded-[var(--radius-card)] bg-accent-soft p-4 text-[13px] leading-relaxed text-[#2f4428]">
+                <div className="mt-5 flex gap-3 rounded-[var(--radius-card)] bg-accent-soft p-4 text-[13px] leading-relaxed text-accent-ink">
                   <ShieldCheck className="mt-0.5 size-5 shrink-0" />
                   <div>Grain has no account, no telemetry and no cloud. Audio, transcripts, notes, embeddings and chats are stored only in the folder below. The only network requests Grain makes are model downloads you start in Models. The local AI runtime is started with networking disabled and only listens on 127.0.0.1.</div>
                 </div>

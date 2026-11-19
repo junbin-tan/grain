@@ -7,7 +7,7 @@ import { EmptyState, Spinner } from "./ui";
 function SpeakerChip({ speaker }: { speaker: string | null }) {
   const me = speaker === "Me";
   return (
-    <span className={`inline-flex h-[18px] items-center rounded-[5px] px-1.5 text-[11px] font-semibold ${me ? "bg-accent-soft text-accent" : "bg-[#ece7f3] text-[#5b4a7a]"}`}>
+    <span className={`inline-flex h-[18px] items-center rounded-[5px] px-1.5 text-[11px] font-semibold ${me ? "bg-accent-soft text-accent-ink" : "bg-them-soft text-them"}`}>
       {speaker ?? "Speaker"}
     </span>
   );
@@ -25,7 +25,7 @@ function SegmentText({ seg, onSaved }: { seg: Segment; onSaved: (text: string) =
         }
       }}
       onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLElement).blur(); } if (e.key === "Escape") { (e.target as HTMLElement).innerText = seg.text; (e.target as HTMLElement).blur(); } }}
-      className="rounded-[3px] outline-none focus:bg-[#fffdf3] focus:shadow-[0_0_0_3px_#fffdf3]">
+      className="rounded-[3px] outline-none focus:bg-raised focus:shadow-[0_0_0_3px_var(--color-raised)]">
       {seg.text}
     </span>
   );
@@ -96,7 +96,7 @@ export function TranscriptView({ segments, marks, at, live, onChanged, emptyHint
                   <SpeakerChip speaker={t.speaker} />
                   <div className="mt-1 text-[14px] leading-[1.6] text-ink">
                     {t.segs.map((s) => (
-                      <span key={s.id} ref={s.id === targetId ? target : undefined} className={`${s.id === targetId ? "bg-[#f3e6b5]" : ""}`} title={s.edited ? `Edited. Original: ${s.originalText}` : fmtTs(s.startMs)}>
+                      <span key={s.id} ref={s.id === targetId ? target : undefined} className={`${s.id === targetId ? "bg-highlight" : ""}`} title={s.edited ? `Edited. Original: ${s.originalText}` : fmtTs(s.startMs)}>
                         <SegmentText seg={s} onSaved={(text) => { s.text = text; s.edited = text !== s.originalText; force((n) => n + 1); onChanged(); }} />
                         {s.edited && <sup className="ml-0.5 text-[9px] text-ink-3">edited</sup>}{" "}
                       </span>

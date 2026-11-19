@@ -9,7 +9,7 @@ import { TranscriptView } from "../components/Transcript";
 import { EnhancedView, useEnhance } from "../components/EnhancedView";
 import { AskPanel } from "../components/AskPanel";
 import { ExportDialog } from "../components/ExportDialog";
-import { Badge, Banner, Button, IconButton, Kbd, LevelBars, Menu, MenuItem, Spinner } from "../components/ui";
+import { Badge, Banner, Button, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner } from "../components/ui";
 
 export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab; at?: number }) {
   const { recording, processing, navigate, back, refreshMeetings, startRecording, settings, catalog, toast } = useApp();
@@ -166,7 +166,7 @@ export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab
                 className="bare h-6 rounded-[6px] bg-transparent px-1.5 text-[12.5px] text-ink-2 outline-none hover:bg-wash">
                 {templates.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
-              {isRecording && <Badge tone="rec"><span className={`size-1.5 rounded-full bg-rec ${recording?.paused ? "" : "animate-pulse-rec"}`} />{recording?.paused ? "Paused" : "Recording"}</Badge>}
+              {isRecording && <Badge tone="rec"><RecDot pulse={!recording?.paused} className="size-1.5" />{recording?.paused ? "Paused" : "Recording"}</Badge>}
               {busy && <Badge tone="accent"><Spinner className="size-3 text-accent" />{busy}</Badge>}
             </div>
 
@@ -243,19 +243,19 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, sid
       <div className="pointer-events-auto flex flex-col items-center gap-2">
         {isRecording && r ? (
           <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-raised py-1 pr-1.5 pl-4 shadow-[var(--shadow-float)]" role="status" aria-label="Recording controls">
-            <span className={`mr-1 size-2.5 rounded-full bg-rec ${r.paused ? "opacity-40" : "animate-pulse-rec"}`} />
+            <RecDot pulse={!r.paused} className={`mr-1 size-2.5 ${r.paused ? "opacity-40" : ""}`} />
             <span className="w-[54px] text-[13px] font-medium tabular-nums">{fmtTs(r.elapsed * 1000)}</span>
             <span className={`flex items-center gap-1 px-1.5 ${r.micOn ? "text-accent" : "text-ink-3"}`} title={r.micOn ? `Microphone: ${r.micDevice}` : "Microphone off"}>
               <Mic className="size-3.5" /><LevelBars level={r.mic} active={r.micOn && !r.paused} />
             </span>
-            <span className={`flex items-center gap-1 px-1.5 ${r.systemOn ? "text-[#5b4a7a]" : "text-ink-3"}`} title={r.systemOn ? "System audio" : "System audio off"}>
+            <span className={`flex items-center gap-1 px-1.5 ${r.systemOn ? "text-them" : "text-ink-3"}`} title={r.systemOn ? "System audio" : "System audio off"}>
               <MonitorSpeaker className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
             </span>
             <div className="mx-1 h-6 w-px bg-line" />
             <IconButton label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-4" /></IconButton>
             <IconButton label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-4" /> : <Pause className="size-4" />}</IconButton>
             <IconButton label="Live transcript" active={side === "live"} onClick={() => setSide(side === "live" ? "none" : "live")}><AudioLines className="size-4" /></IconButton>
-            <Button variant="rec" className="ml-1 rounded-full" onClick={() => api.stopRecording()}><Square className="size-3 fill-current" />Stop</Button>
+            <Button variant="rec" className="ml-1" onClick={() => api.stopRecording()}><Square className="size-3 fill-current text-rec" />Stop</Button>
           </div>
         ) : enhance.stage ? (
           <div className="flex h-11 animate-rise items-center gap-2 rounded-full border border-line bg-raised px-4 text-[13px] text-ink-2 shadow-[var(--shadow-float)]">
@@ -269,17 +269,17 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, sid
                 <MonitorSpeaker className="size-3.5" />Computer audio
               </button>
               <span className={`flex h-8 items-center gap-1.5 px-2 text-[12.5px] ${settings.micDevice === "none" ? "text-ink-3 line-through" : "text-ink-2"}`} title={settings.micDevice === "none" ? "Microphone is off (Settings › Audio)" : "Microphone"}><Mic className="size-3.5" />Mic</span>
-              <Button variant="primary" className="rounded-full" loading={starting} onClick={record}><span className="size-2 rounded-full bg-rec" />Start recording <span className="text-white/60">⌘R</span></Button>
+              <RecordButton loading={starting} onClick={record}>Start recording <span className="text-white/60">⌘R</span></RecordButton>
             </div>
             <div className="text-[11.5px] text-ink-3">Tell everyone you're recording. Consent rules vary by place. Audio stays on this Mac.</div>
           </>
         ) : (
           <div className="flex h-12 animate-rise items-center gap-1 rounded-full border border-line bg-raised p-1.5 shadow-[var(--shadow-float)]">
-            <Button variant="ghost" className="rounded-full" onClick={record} disabled={!!busy}><RotateCcw className="size-3.5" />Resume recording</Button>
+            <RecordButton variant="ghost" onClick={record} disabled={!!busy}>Resume recording</RecordButton>
             {hasEnhanced && onEnhancedTab ? (
-              <Button variant="primary" className="rounded-full" disabled={!!busy} onClick={() => enhance.run()}><RefreshCw className="size-3.5" />Regenerate</Button>
+              <Button variant="primary" disabled={!!busy} onClick={() => enhance.run()}><RefreshCw className="size-3.5" />Regenerate</Button>
             ) : (
-              <Button variant="primary" className="rounded-full" disabled={!hasInput || !!busy} onClick={() => (hasEnhanced ? setTab("enhanced") : enhance.run())}>
+              <Button variant="primary" disabled={!hasInput || !!busy} onClick={() => (hasEnhanced ? setTab("enhanced") : enhance.run())}>
                 <Sparkles className="size-4" />{hasEnhanced ? "View enhanced notes" : "Enhance notes"} {!hasEnhanced && <Kbd>⌘E</Kbd>}
               </Button>
             )}

@@ -18,7 +18,7 @@ function Answer({ text, sources, onSource }: { text: string; sources: Source[]; 
     const s = sources.find((x) => x.n === n);
     parts.push(
       <button key={k++} onClick={() => s && onSource(s)} disabled={!s} title={s ? `${s.meetingTitle}${s.startMs != null ? ` · ${fmtTs(s.startMs)}` : ""}` : undefined}
-        className="mx-[1px] inline-grid h-[17px] min-w-[17px] -translate-y-[1px] place-items-center rounded-[5px] bg-accent-soft px-1 align-middle text-[10.5px] font-semibold text-accent hover:bg-[#d7e2ca]">
+        className="mx-[1px] inline-grid h-[17px] min-w-[17px] -translate-y-[1px] place-items-center rounded-[5px] bg-accent-soft px-1 align-middle text-[10.5px] font-semibold text-accent-ink hover:bg-accent/20">
         {n}
       </button>,
     );
@@ -146,7 +146,7 @@ export function AskPanel({ meetingId, threadId: initialThread, onThread, compact
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
             className="max-h-32 min-h-[30px] flex-1 resize-none bg-transparent py-1.5 text-[13.5px] outline-none placeholder:text-ink-3" autoFocus={!compact} />
           <button type="submit" aria-label="Send" disabled={!input.trim() || pending}
-            className="grid size-[30px] place-items-center rounded-[8px] bg-ink text-white disabled:bg-line-strong">
+            className="grid size-[30px] place-items-center rounded-full bg-ink text-white hover:bg-ink/88 disabled:bg-line-strong">
             {pending ? <Spinner className="text-white" /> : <ArrowUp className="size-4" />}
           </button>
         </form>

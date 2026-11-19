@@ -3,12 +3,12 @@ import { AlertTriangle, FileText, Mic, MoreHorizontal, Search, Trash2 } from "lu
 import { useApp } from "../lib/store";
 import { api, type Meeting } from "../lib/api";
 import { dayLabel, fmtDuration, fmtTime } from "../lib/format";
-import { Badge, Banner, Button, EmptyState, IconButton, Kbd, Menu, MenuItem } from "../components/ui";
+import { Badge, Banner, Button, EmptyState, IconButton, Kbd, Menu, MenuItem, RecDot, RecordButton } from "../components/ui";
 import { confirm } from "../lib/dialogs";
 
 function StatusBadge({ m, processing }: { m: Meeting; processing?: string }) {
   if (processing) return <Badge tone="accent">{processing}</Badge>;
-  if (m.status === "recording") return <Badge tone="rec"><span className="size-1.5 animate-pulse-rec rounded-full bg-rec" />Recording</Badge>;
+  if (m.status === "recording") return <Badge tone="rec"><RecDot pulse className="size-1.5" />Recording</Badge>;
   if (m.status === "paused") return <Badge tone="rec">Paused</Badge>;
   if (m.status === "interrupted") return <Badge tone="warn"><AlertTriangle className="size-3" />Interrupted</Badge>;
   return null;
@@ -69,7 +69,7 @@ export function Home() {
               <div className="text-[14px] font-semibold">Start a meeting</div>
               <div className="text-[12.5px] text-ink-2">Grain records your mic and computer audio, with no bot joining. Works with Zoom, Meet, Teams and in-person meetings.</div>
             </div>
-            <Button variant="primary" onClick={() => newMeeting(true)}><span className="size-2 rounded-full bg-rec" />Record</Button>
+            <RecordButton onClick={() => newMeeting(true)}>Record</RecordButton>
           </div>
 
           {meetings.length === 0 ? (

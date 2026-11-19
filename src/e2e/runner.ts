@@ -271,7 +271,7 @@ async function phase1() {
     const a = await waitFor(() => document.querySelector(".enhanced .ProseMirror a[href^='#t=']") as HTMLElement, "source link");
     await click(a, "timestamp");
     await waitFor(() => tab("Transcript")?.getAttribute("aria-selected") === "true", "transcript tab selected");
-    await waitFor(() => main().querySelector("span.bg-\\[\\#f3e6b5\\]"), "highlighted line");
+    await waitFor(() => main().querySelector("span.bg-highlight"), "highlighted line");
     await click(tab("Enhanced")!, "back to enhanced");
   });
   await step("toggle an action item done", async () => {
@@ -438,7 +438,7 @@ async function phase1() {
     await click(byLabel("Cancel download of Whisper Base"), "cancel");
     await waitFor(() => byText("Resume", row("Whisper Base")!), "resume offered", 15000).catch((e) => { throw new Error(`${e} — row: ${text(row("Whisper Base"))}`); });
     await click(byText("Resume", row("Whisper Base")!), "resume");
-    await waitFor(() => { const x = row("Whisper Base"); return x && findText("Q4_K_M", x) && byText("Use", x) === null && x.className.includes("bg-[#f7f9f3]"); }, "installed and active", 120000);
+    await waitFor(() => { const x = row("Whisper Base"); return x && findText("Q4_K_M", x) && byText("Use", x) === null && x.getAttribute("aria-pressed") === "true"; }, "installed and active", 120000);
     metrics.framesWhileDownloading = stop();
     return metrics.framesWhileDownloading;
   });
@@ -467,7 +467,7 @@ async function phase1() {
     await click(byText("Use — no download", r), "use local copy");
     await waitFor(() => { const x = row("Qwen3-ASR 1.7B"); return x && findText(/From Handy .*shared copy, no extra disk space/, x); }, "installed from Handy's copy", 120000);
     const ms = Math.round(now() - t0);
-    const active = row("Qwen3-ASR 1.7B")!.className.includes("bg-[#f7f9f3]");
+    const active = row("Qwen3-ASR 1.7B")!.getAttribute("aria-pressed") === "true";
     // Switch back, delete Grain's copy, and prove Handy's original is untouched.
     await click(byText("Use", row("Parakeet Unified English 0.6B")!), "use parakeet");
     await click(byLabel("Delete Qwen3-ASR 1.7B"), "trash");

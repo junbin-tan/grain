@@ -32,7 +32,7 @@ These are stated plainly. Nothing below is hidden behind a fake button: features
 ## Behavioural limits
 
 - **Finding other apps' models:** catalogue models are recognised in LM Studio/Jan/GPT4All/shared folders only if the file keeps its original name and exact size (Hugging Face and Ollama copies are matched by hash regardless of name). Handy in portable mode keeps its cache next to the app, so add that folder under Settings › Privacy & data. Other macOS accounts' home folders can't be read; share models via `/Users/Shared`.
-- **Echo:** on speakers without headphones, the mic hears the call. Grain drops mic lines that repeat a system line, but partial overlaps can remain. Headphones give the cleanest "Me/Them" split.
+- **Echo:** on speakers without headphones, the mic hears the call. Before transcribing, Grain silences mic audio whose loudness follows the system track (any language), then also drops mic lines that repeat a system line. If you talk *over* the other side, those words can be lost from "Me". Headphones give the cleanest "Me/Them" split.
 - **Owners:** "Me" can be assigned as owner when the user said the line, even if it wasn't phrased as an explicit "I'll". Owners and deadlines must appear in the cited lines or your notes, or they're removed and the removal is reported.
 - **Ask Grain retrieval** is keyword plus (optional) semantic, up to 12 sources. Questions needing exhaustive aggregation across many meetings ("every blocker this quarter") may miss items.
 - **"Me" in prose:** summaries sometimes say "updated by Me" instead of "you", despite the prompt asking for "you".

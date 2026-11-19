@@ -33,7 +33,7 @@ export function ActionsPage() {
               <button key={s} onClick={() => setShow(s)} className={`h-7 rounded-full px-3 text-[12.5px] capitalize ${show === s ? "bg-ink text-white" : "text-ink-2 hover:bg-wash"}`}>{s}</button>
             ))}
             <div className="mx-2 h-4 w-px bg-line" />
-            <button onClick={() => setMine((v) => !v)} className={`h-7 rounded-full px-3 text-[12.5px] ${mine ? "bg-accent-soft text-accent" : "text-ink-2 hover:bg-wash"}`}>Assigned to me</button>
+            <button onClick={() => setMine((v) => !v)} className={`h-7 rounded-full px-3 text-[12.5px] ${mine ? "bg-accent-soft text-accent-ink" : "text-ink-2 hover:bg-wash"}`}>Assigned to me</button>
           </div>
           {byMeeting.length === 0 && <EmptyState icon={<CheckSquare className="size-5" />} title={rows.length ? "Nothing here" : "No action items yet"} body="Action items are extracted when you enhance a meeting's notes. Only commitments people actually made are listed as assigned." />}
           {byMeeting.map((g) => (

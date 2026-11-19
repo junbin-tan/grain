@@ -1,35 +1,46 @@
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
 
+// Actions are pills; surfaces (cards, inputs, menus, dialogs) are rounded rectangles. See docs/DESIGN_SYSTEM.md.
 type Variant = "primary" | "secondary" | "ghost" | "danger" | "rec";
 const variants: Record<Variant, string> = {
-  primary: "bg-ink text-white hover:bg-[#333a34] active:bg-black",
+  primary: "bg-ink text-white hover:bg-ink/88 active:bg-black",
   secondary: "bg-raised text-ink border border-line-strong hover:bg-wash",
   ghost: "text-ink-2 hover:bg-wash hover:text-ink",
-  danger: "bg-rec text-white hover:bg-[#c93b2e]",
-  rec: "bg-rec-soft text-rec hover:bg-[#f7d6d1]",
+  danger: "bg-rec text-white hover:bg-rec/90",
+  rec: "bg-rec-soft text-rec-ink hover:bg-rec/20",
 };
 
 export function Button({ variant = "secondary", size = "md", loading, children, className = "", ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "sm" | "md" | "lg"; loading?: boolean }) {
-  const s = size === "sm" ? "h-7 px-2.5 text-[12.5px] gap-1.5 rounded-[7px]" : size === "lg" ? "h-10 px-4 text-[14px] gap-2 rounded-[10px]" : "h-8 px-3 text-[13px] gap-1.5 rounded-[8px]";
+  const s = size === "sm" ? "h-7 px-3 text-[12.5px] gap-1.5" : size === "lg" ? "h-10 px-5 text-[14px] gap-2" : "h-8 px-3.5 text-[13px] gap-1.5";
   return (
-    <button {...rest} disabled={rest.disabled || loading} className={`inline-flex shrink-0 items-center justify-center font-medium whitespace-nowrap transition-colors disabled:opacity-45 disabled:pointer-events-none ${s} ${variants[variant]} ${className}`}>
+    <button {...rest} disabled={rest.disabled || loading} className={`inline-flex shrink-0 items-center justify-center rounded-full font-medium whitespace-nowrap transition-colors disabled:opacity-45 disabled:pointer-events-none ${s} ${variants[variant]} ${className}`}>
       {loading && <Loader2 className="size-3.5 animate-spin" />}
       {children}
     </button>
   );
 }
 
+/** The recording dot. Pulses while live; the only place `rec` red appears outside Stop. */
+export function RecDot({ pulse, className = "size-2" }: { pulse?: boolean; className?: string }) {
+  return <span aria-hidden className={`shrink-0 rounded-full bg-rec ${pulse ? "animate-pulse-rec" : ""} ${className}`} />;
+}
+
+/** Every control that starts audio capture looks the same: the red dot leads the label. */
+export function RecordButton({ variant = "primary", loading, children, ...rest }: Parameters<typeof Button>[0]) {
+  return <Button variant={variant} loading={loading} {...rest}>{!loading && <RecDot />}{children}</Button>;
+}
+
 export function IconButton({ label, children, className = "", active, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; active?: boolean }) {
   return (
-    <button {...rest} aria-label={label} title={label} className={`inline-grid size-8 shrink-0 place-items-center rounded-[8px] text-ink-2 transition-colors hover:bg-wash hover:text-ink disabled:opacity-40 ${active ? "bg-wash text-ink" : ""} ${className}`}>
+    <button {...rest} aria-label={label} title={label} className={`inline-grid size-8 shrink-0 place-items-center rounded-full text-ink-2 transition-colors hover:bg-wash hover:text-ink disabled:opacity-40 ${active ? "bg-wash text-ink" : ""} ${className}`}>
       {children}
     </button>
   );
 }
 
 export function Badge({ children, tone = "neutral", className = "" }: { children: ReactNode; tone?: "neutral" | "accent" | "rec" | "warn"; className?: string }) {
-  const t = { neutral: "bg-wash text-ink-2", accent: "bg-accent-soft text-accent", rec: "bg-rec-soft text-rec", warn: "bg-warn-soft text-warn" }[tone];
+  const t = { neutral: "bg-wash text-ink-2", accent: "bg-accent-soft text-accent-ink", rec: "bg-rec-soft text-rec-ink", warn: "bg-warn-soft text-warn-ink" }[tone];
   return <span className={`inline-flex h-5 items-center gap-1 rounded-full px-2 text-[11.5px] font-medium whitespace-nowrap ${t} ${className}`}>{children}</span>;
 }
 
@@ -113,7 +124,7 @@ export function Modal({ open, onClose, title, children, width = 520 }: { open: b
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 grid animate-fade place-items-start justify-center bg-[rgb(31_36_32/0.18)] pt-[12vh]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-50 grid animate-fade place-items-start justify-center bg-ink/20 pt-[12vh]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div role="dialog" aria-modal="true" className="animate-rise overflow-hidden rounded-[14px] border border-line bg-raised shadow-[var(--shadow-pop)]" style={{ width }}>
         {title && (
           <div className="flex h-12 items-center justify-between border-b border-line px-4">
@@ -139,7 +150,7 @@ export function EmptyState({ icon, title, body, children }: { icon?: ReactNode; 
 }
 
 export function Banner({ tone = "neutral", icon, children, action }: { tone?: "neutral" | "warn" | "rec" | "accent"; icon?: ReactNode; children: ReactNode; action?: ReactNode }) {
-  const t = { neutral: "bg-wash text-ink-2", warn: "bg-warn-soft text-[#7a4d0c]", rec: "bg-rec-soft text-[#9b2f24]", accent: "bg-accent-soft text-accent" }[tone];
+  const t = { neutral: "bg-wash text-ink-2", warn: "bg-warn-soft text-warn-ink", rec: "bg-rec-soft text-rec-ink", accent: "bg-accent-soft text-accent-ink" }[tone];
   return (
     <div className={`flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-[13px] ${t}`}>
       {icon && <span className="shrink-0">{icon}</span>}

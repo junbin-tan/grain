@@ -19,7 +19,7 @@ const ROLES: { id: Role; label: string; blurb: string; setting: string }[] = [
   { id: "embed", label: "Search by meaning", blurb: "Optional. An embedding model lets search and Ask Grain find related passages, not just exact words.", setting: "embedModel" },
 ];
 
-const GRADE_TONE: Record<string, string> = { A: "bg-[#dfeccf] text-[#2f5a1f]", B: "bg-[#e8efd5] text-[#4d6420]", C: "bg-[#f4ecd0] text-[#7a6214]", D: "bg-[#f6e0cc] text-[#8a4b14]", F: "bg-[#f6d9d4] text-[#933226]" };
+const GRADE_TONE: Record<string, string> = { A: "bg-accent-soft text-accent-ink", B: "bg-accent-soft text-accent-ink", C: "bg-warn-soft text-warn-ink", D: "bg-warn-soft text-warn-ink", F: "bg-rec-soft text-rec-ink" };
 
 function Grade({ m, lang }: { m: CatalogModel; lang: string }) {
   const err = m.accuracy[lang];
@@ -63,8 +63,8 @@ function Row({ m, active, recommended, reason, lang, ramGb, langs }: { m: Catalo
   };
 
   return (
-    <div role="button" tabIndex={0} onClick={use} onKeyDown={(e) => e.key === "Enter" && use()}
-      className={`group grid grid-cols-[22px_1fr_44px_54px_72px_120px] items-center gap-3 border-b border-line px-3 py-2.5 last:border-0 ${installed && !active ? "cursor-pointer hover:bg-paper" : ""} ${active ? "bg-[#f7f9f3]" : ""}`}>
+    <div role="button" tabIndex={0} aria-pressed={active} onClick={use} onKeyDown={(e) => e.key === "Enter" && use()}
+      className={`group grid grid-cols-[22px_1fr_44px_54px_72px_120px] items-center gap-3 border-b border-line px-3 py-2.5 last:border-0 ${installed && !active ? "cursor-pointer hover:bg-paper" : ""} ${active ? "bg-accent-soft/40" : ""}`}>
       <span className={`grid size-[18px] place-items-center rounded-full border ${active ? "border-accent bg-accent text-white" : installed ? "border-line-strong" : "border-transparent"}`}>
         {active && <Check className="size-3" />}
         {!installed && !downloading && <Download className="size-3.5 text-ink-3" />}
@@ -98,7 +98,7 @@ function Row({ m, active, recommended, reason, lang, ramGb, langs }: { m: Catalo
             <span className="mr-0.5 text-[11.5px] text-ink-3">Size:</span>
             {[...m.quants].sort((a, b) => a.size - b.size).map((q) => (
               <button key={q.quant} onClick={() => setQuant(q.quant)} title={`${q.quant}: ${QUANT_HINT[q.quant] ?? ""}. Smaller files use less memory and can be slightly less accurate.`}
-                className={`h-5 rounded-[5px] px-1.5 text-[11px] whitespace-nowrap tabular-nums ${quant === q.quant ? "bg-ink text-white" : "bg-wash text-ink-2 hover:bg-line"}`}>
+                className={`h-5 rounded-full px-2 text-[11px] whitespace-nowrap tabular-nums ${quant === q.quant ? "bg-ink text-white" : "bg-wash text-ink-2 hover:bg-line"}`}>
                 {q.quant} · {fmtBytes(q.size)}
               </button>
             ))}
@@ -312,7 +312,7 @@ export function ModelsPage({ role: initialRole }: { role?: Role }) {
             if (!n) return null;
             const sources = [...new Set([...fc.map((m) => m.found!.source), ...others.map((o) => o.source)].map((s) => s.replace(/ \(.*\)$/, "")))];
             return (
-              <div className="mt-4 flex items-center gap-2.5 rounded-[10px] bg-accent-soft px-3 py-2 text-[13px] text-[#2f4428]">
+              <div className="mt-4 flex items-center gap-2.5 rounded-[10px] bg-accent-soft px-3 py-2 text-[13px] text-accent-ink">
                 <Laptop className="size-4 shrink-0" />
                 <div className="flex-1">Found {n} model{n > 1 ? "s" : ""} already on this Mac ({sources.join(", ")}). Use them with no download and no extra disk space.</div>
               </div>

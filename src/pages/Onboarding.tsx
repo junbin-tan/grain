@@ -10,12 +10,10 @@ const STEPS = ["Welcome", "Privacy", "Your Mac", "Languages", "Models", "Permiss
 
 function Mark() {
   return (
-    // Same geometry as scripts/make-icon.swift: a grain seed whose crease is three voice-level bars.
+    // Same geometry as scripts/make-icon.swift: one grain seed; its crease doubles as a single voice-level bar.
     <svg viewBox="-50 -50 100 100" className="size-14" aria-hidden>
-      <defs><linearGradient id="grain-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#4b6a3f" /><stop offset="1" stopColor="#2f4528" /></linearGradient></defs>
-      <rect x="-50" y="-50" width="100" height="100" rx="22.5" fill="url(#grain-tile)" />
-      <path d="M0 -30 C18 -12 18 12 0 30 C-18 12 -18 -12 0 -30Z" fill="#f4efe4" />
-      <g stroke="#3a5232" strokeWidth="3.6" strokeLinecap="round"><path d="M-7 -5 V5" /><path d="M0 -12 V12" /><path d="M7 -7 V7" /></g>
+      <rect x="-50" y="-50" width="100" height="100" rx="22.5" className="fill-accent" />
+      <path fillRule="evenodd" className="fill-paper" d="M0 -30 C19 -12 19 12 0 30 C-19 12 -19 -12 0 -30Z M-2.2 -15 a2.2 2.2 0 0 1 4.4 0 V15 a2.2 2.2 0 0 1 -4.4 0Z" />
     </svg>
   );
 }
@@ -129,7 +127,7 @@ export function Onboarding() {
           {perms?.mic === "granted" ? <Badge tone="accent"><Check className="size-3" />Allowed</Badge> : perms?.mic === "denied" ? <Button size="sm" onClick={() => api.openPrivacySettings("mic")}>Open System Settings</Button> : <Button size="sm" onClick={async () => setPerms(await api.requestPermission("mic"))}>Allow</Button>}
         </div>
         <div className="flex items-center gap-3 rounded-[10px] border border-line bg-raised px-3.5 py-3">
-          <MonitorSpeaker className="size-5 text-[#5b4a7a]" />
+          <MonitorSpeaker className="size-5 text-them" />
           <div className="flex-1"><div className="text-[13.5px] font-medium">Screen & system audio</div><div className="text-[12px] text-ink-2">Lets Grain hear the other people on Zoom, Meet or Teams. Your screen is never recorded.</div></div>
           {perms?.screen === "granted" ? <Badge tone="accent"><Check className="size-3" />Allowed</Badge> : <div className="flex gap-1.5"><Button size="sm" onClick={async () => setPerms(await api.requestPermission("screen"))}>Allow</Button><Button size="sm" variant="ghost" onClick={() => api.openPrivacySettings("screen")}>Settings</Button></div>}
         </div>

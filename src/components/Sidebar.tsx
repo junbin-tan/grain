@@ -1,12 +1,12 @@
 import { CheckSquare, Cpu, Home, MessageCircle, Plus, Search, Settings, ShieldCheck } from "lucide-react";
 import { useApp, type Route } from "../lib/store";
-import { Kbd } from "./ui";
+import { Kbd, RecDot } from "./ui";
 import { fmtTs } from "../lib/format";
 
 function NavItem({ icon, label, active, onClick, hint }: { icon: React.ReactNode; label: string; active?: boolean; onClick: () => void; hint?: string }) {
   return (
     <button onClick={onClick} aria-current={active ? "page" : undefined}
-      className={`group flex h-[30px] w-full items-center gap-2.5 rounded-[7px] px-2 text-[13px] transition-colors ${active ? "bg-[#e8e5dc] font-medium text-ink" : "text-ink-2 hover:bg-[#ebe8e0] hover:text-ink"}`}>
+      className={`group flex h-[30px] w-full items-center gap-2.5 rounded-[7px] px-2 text-[13px] transition-colors ${active ? "bg-line font-medium text-ink" : "text-ink-2 hover:bg-wash hover:text-ink"}`}>
       <span className="grid size-4 place-items-center">{icon}</span>
       <span className="flex-1 text-left">{label}</span>
       {hint && <span className="opacity-0 transition-opacity group-hover:opacity-100"><Kbd>{hint}</Kbd></span>}
@@ -23,7 +23,7 @@ export function Sidebar() {
       <div className="drag h-[52px] shrink-0" />
       <div className="px-2.5">
         <button onClick={() => newMeeting(false)}
-          className="mb-2 flex h-8 w-full items-center gap-2 rounded-[8px] border border-line-strong bg-raised px-2.5 text-[13px] font-medium text-ink shadow-[0_1px_1px_rgb(0_0_0/0.03)] hover:bg-paper">
+          className="mb-2 flex h-8 w-full items-center gap-2 rounded-full border border-line-strong bg-raised px-2.5 text-[13px] font-medium text-ink shadow-[0_1px_1px_rgb(0_0_0/0.03)] hover:bg-paper">
           <Plus className="size-4" /> <span className="flex-1 text-left">New note</span> <Kbd>⌘N</Kbd>
         </button>
         <NavItem icon={<Search className="size-[15px]" />} label="Search" onClick={() => setSearchOpen(true)} hint="⌘K" />
@@ -34,8 +34,8 @@ export function Sidebar() {
 
       {recording && (
         <button onClick={() => navigate({ name: "meeting", id: recording.meetingId })}
-          className="mx-2.5 mt-3 flex items-center gap-2 rounded-[9px] bg-rec-soft px-2.5 py-2 text-left text-[12.5px] text-[#9b2f24]">
-          <span className={`size-2 rounded-full bg-rec ${recording.paused ? "" : "animate-pulse-rec"}`} />
+          className="mx-2.5 mt-3 flex items-center gap-2 rounded-[9px] bg-rec-soft px-2.5 py-2 text-left text-[12.5px] text-rec-ink">
+          <RecDot pulse={!recording.paused} />
           <span className="flex-1 truncate font-medium">{recording.paused ? "Paused" : "Recording"}</span>
           <span className="tabular-nums">{fmtTs(recording.elapsed * 1000)}</span>
         </button>
@@ -48,8 +48,8 @@ export function Sidebar() {
           const active = route.name === "meeting" && route.id === m.id;
           return (
             <button key={m.id} onClick={() => navigate({ name: "meeting", id: m.id })}
-              className={`flex h-[28px] w-full items-center gap-2 rounded-[7px] px-2 text-left text-[12.5px] ${active ? "bg-[#e8e5dc] text-ink" : "text-ink-2 hover:bg-[#ebe8e0]"}`}>
-              {recording?.meetingId === m.id && <span className="size-1.5 shrink-0 rounded-full bg-rec" />}
+              className={`flex h-[28px] w-full items-center gap-2 rounded-[7px] px-2 text-left text-[12.5px] ${active ? "bg-line text-ink" : "text-ink-2 hover:bg-wash"}`}>
+              {recording?.meetingId === m.id && <RecDot className="size-1.5" />}
               <span className="truncate">{m.title || "Untitled meeting"}</span>
             </button>
           );
