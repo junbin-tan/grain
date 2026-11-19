@@ -28,6 +28,13 @@ function Shell() {
     return () => window.removeEventListener("keydown", k);
   }, [route, newMeeting]);
 
+  // tokens.css reads data-theme; no attribute means follow the OS.
+  useEffect(() => {
+    const t = settings.theme;
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    else delete document.documentElement.dataset.theme;
+  }, [settings.theme]);
+
   if (!ready) return <div className="grid h-full place-items-center"><Spinner /></div>;
   if (!settings.onboardingDone) return <><Onboarding /><Toasts /></>;
 

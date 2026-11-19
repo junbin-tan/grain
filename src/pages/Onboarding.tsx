@@ -11,9 +11,11 @@ import { Badge, Banner, Button, Progress } from "../components/ui";
 const STEPS = ["Welcome", "Privacy", "Your Mac", "Languages", "Models", "Permissions", "Audio test", "Ready"];
 
 function Lockup() {
+  const { settings } = useApp();
+  const media = settings.theme === "dark" ? "all" : settings.theme === "light" ? "not all" : "(prefers-color-scheme: dark)";
   return (
     <picture>
-      <source srcSet={lockupReverse} media="(prefers-color-scheme: dark)" />
+      <source srcSet={lockupReverse} media={media} />
       <img src={lockup} alt="grain" className="h-14 w-auto" />
     </picture>
   );

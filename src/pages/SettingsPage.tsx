@@ -171,6 +171,9 @@ export function SettingsPage({ section: initial }: { section?: string }) {
 
             {section === "general" && (
               <Card>
+                <Row label="Appearance" desc="System follows your Mac's light or dark setting.">
+                  <Select label="Appearance" value={settings.theme ?? "system"} onChange={(v) => setSetting("theme", v)} options={[{ value: "system", label: "System" }, { value: "light", label: "Light" }, { value: "dark", label: "Dark" }]} />
+                </Row>
                 <Row label="Default note template" desc="Used for new meetings. You can change it per meeting.">
                   <Select label="Default template" value={settings.defaultTemplate ?? "general"} onChange={(v) => setSetting("defaultTemplate", v)} options={templates.map((t) => ({ value: t.id, label: t.name }))} className="w-[220px]" />
                 </Row>
