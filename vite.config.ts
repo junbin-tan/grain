@@ -6,8 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   clearScreen: false,
-  server: { port: 1420, strictPort: true, watch: { ignored: ["**/src-tauri/**"] } },
-  envPrefix: ["VITE_", "TAURI_"],
+  // One explicit address, the same as devUrl, so a listener on the other loopback family is never picked.
+  server: { host: "127.0.0.1", port: 1420, strictPort: true, watch: { ignored: ["**/src-tauri/**"] } },
+  envPrefix: ["VITE_", "TAURI_ENV_"],
   build: { target: "safari16", sourcemap: false, chunkSizeWarningLimit: 1500 },
   test: { environment: "node", include: ["src/**/*.test.ts"], css: { include: [/\?raw$/] } },
 });

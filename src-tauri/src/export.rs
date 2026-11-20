@@ -15,8 +15,9 @@ pub fn markdown(core: &Core, meeting_id: &str) -> Result<String> {
     let mut md = format!("# {}\n\n", if m.title.is_empty() { "Untitled meeting" } else { &m.title });
     md.push_str(&format!("*{}* · {} min\n\n", date(m.started_at.unwrap_or(m.created_at)), m.duration_ms / 60000));
     if let Some(n) = core.db.latest_note(meeting_id, "enhanced")? {
-        // Drop in-app timestamp links; keep the times.
-        let body = regex_lite_links(&n.content);
+        // Drop in-app timestamp links; keep the times. The model wrote this text, and other Markdown
+        // viewers load images and render HTML without Grain's CSP, so neither survives export.
+        let body = regex_lite_links(&n.content).replace("![", "\\![").replace('<', "\\<");
         md.push_str(&format!("{body}\n"));
     }
     if let Some(n) = core.db.latest_note(meeting_id, "manual")?.filter(|n| !n.content.trim().is_empty()) {
@@ -57,7 +58,7 @@ pub fn plain_text(core: &Core, meeting_id: &str) -> Result<String> {
         .lines()
         .map(|l| {
             let l = l.trim_start_matches('#').trim_start();
-            l.replace("**", "").replace("- [ ] ", "• ").replace("- ", "• ").replace('*', "")
+            l.replace("**", "").replace("- [ ] ", "• ").replace("- ", "• ").replace('*', "").replace("\\<", "<").replace("\\![", "![")
         })
         .collect::<Vec<_>>()
         .join("\n"))

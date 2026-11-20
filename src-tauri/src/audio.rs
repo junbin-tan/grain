@@ -240,14 +240,25 @@ pub fn similarity(a: &str, b: &str) -> f32 {
     inter / ta.len().min(tb.len()) as f32
 }
 
+/// Share of tokens the two texts have in common, out of the larger one. Unlike `similarity`,
+/// a short line is not a copy of a long one just because its words appear there.
+fn near_copy(a: &str, b: &str) -> f32 {
+    let (ta, tb) = (tokens(a), tokens(b));
+    if ta.is_empty() || tb.is_empty() {
+        return 0.0;
+    }
+    ta.intersection(&tb).count() as f32 / ta.len().max(tb.len()) as f32
+}
+
 /// When the user is on speakers, the microphone also hears the remote side. Find
 /// mic segments that repeat an overlapping system-audio segment so they can be dropped.
+/// Only near-copies count: the remote side quoting the user must not delete what the user said.
 pub fn echo_duplicates(segs: &[crate::db::Segment]) -> Vec<i64> {
     let system: Vec<_> = segs.iter().filter(|s| s.source == "system").collect();
     segs.iter()
         .filter(|m| m.source == "mic")
         .filter(|m| {
-            system.iter().any(|s| s.start_ms <= m.end_ms + 2000 && s.end_ms + 2000 >= m.start_ms && similarity(&m.text, &s.text) >= 0.6)
+            system.iter().any(|s| s.start_ms <= m.end_ms + 2000 && s.end_ms + 2000 >= m.start_ms && near_copy(&m.text, &s.text) >= 0.6)
         })
         .map(|m| m.id)
         .collect()
@@ -334,6 +345,9 @@ mod tests {
             s(3, "mic", "Sounds good, I'll write the notes.", 5000),
             s(4, "system", "我们下周发布", 9000),
             s(5, "mic", "我们下周发布", 9100),
+            // The remote side repeats the user's short answer inside a longer sentence: not an echo.
+            s(6, "mic", "Yes.", 14000),
+            s(7, "system", "Yes, so we agreed to move the launch to the next quarter.", 14200),
         ];
         assert_eq!(echo_duplicates(&segs), vec![2, 5]);
     }

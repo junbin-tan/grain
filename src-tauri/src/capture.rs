@@ -177,9 +177,8 @@ async fn finalize(core: Arc<Core>, meeting_id: String, live: Option<tokio::task:
             err = Some(e.to_string());
         }
     }
-    // Retention policy: with "Keep audio" off, audio is deleted once the transcript exists.
-    if !core.db.setting_bool("keepAudio", true) && err.is_none() && !core.db.segments(&meeting_id).map(|s| s.is_empty()).unwrap_or(true) {
-        let _ = core.delete_audio(&meeting_id);
+    if err.is_none() {
+        apply_retention(&core, &meeting_id);
     }
     let _ = crate::chat::index_meeting(&core, &meeting_id).await;
     let warm = core.clone();
@@ -187,6 +186,13 @@ async fn finalize(core: Arc<Core>, meeting_id: String, live: Option<tokio::task:
     let status = if clean { "done" } else { "interrupted" };
     let _ = core.db.set_status(&meeting_id, status);
     (core.emit)("meeting-status", json!({"meetingId": meeting_id, "status": status, "error": err}));
+}
+
+/// Retention policy: with "Keep audio" off, audio is deleted once the transcript exists.
+pub fn apply_retention(core: &Core, meeting_id: &str) {
+    if !core.db.setting_bool("keepAudio", true) && !core.db.segments(meeting_id).map(|s| s.is_empty()).unwrap_or(true) {
+        let _ = core.delete_audio(meeting_id);
+    }
 }
 
 async fn send(core: &Core, cmd: &str) -> Result<()> {

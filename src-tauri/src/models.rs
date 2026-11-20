@@ -418,12 +418,16 @@ impl Downloads {
 /// folder (APFS, no extra space) or, on another volume, use it in place. The original is never changed.
 async fn adopt(db: &Db, models_root: &Path, m: &CatalogModel, f: &crate::local::Found, emit: &Emit) -> Result<InstalledModel> {
     emit("model-download", json!({"id": m.id, "state": "verifying", "downloaded": 0, "total": m.size, "source": f.source}));
-    let (h, n) = hash_with_progress(PathBuf::from(&f.path), m.id.clone(), m.size, emit.clone()).await?;
+    let dir = model_dir(models_root, m);
+    // Clone first, then hash the clone: the original can change after it was checked, the clone cannot.
+    let (path, how) = crate::local::materialize(Path::new(&f.path), &dir.join(&m.filename))?;
+    let (h, n) = hash_with_progress(path.clone(), m.id.clone(), m.size, emit.clone()).await?;
     if n != m.size || hex::encode(h.finalize()) != m.sha256 {
+        if how == "clone" {
+            let _ = std::fs::remove_file(&path);
+        }
         bail!("The copy in {} does not match the expected file (it may be incomplete or modified). Downloading instead.", f.source);
     }
-    let dir = model_dir(models_root, m);
-    let (path, how) = crate::local::materialize(Path::new(&f.path), &dir.join(&m.filename))?;
     for q in m.quants.iter().filter(|q| q.filename != m.filename) {
         let _ = std::fs::remove_file(dir.join(&q.filename));
     }
@@ -487,17 +491,25 @@ pub fn import_as(db: &Db, models_root: &Path, role: &str, src: &Path, found_in: 
         bail!("This is not a GGUF model file. Grain can import .gguf files only.");
     }
     let stem = src.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_else(|| "model".into());
-    let id = format!("custom-{}", slug(&stem));
+    // Never take over another model's entry: a same-named file gets its own id.
+    let base = format!("custom-{}", slug(&stem));
+    let mut id = base.clone();
+    for n in 2.. {
+        if db.installed_model(&id)?.is_none() {
+            break;
+        }
+        id = format!("{base}-{n}");
+    }
     let filename = src.file_name().map(|s| s.to_string_lossy().to_string()).unwrap_or_else(|| format!("{stem}.gguf"));
     let dir = models_root.join(role).join(&id);
     std::fs::create_dir_all(&dir)?;
     let dest = dir.join(&filename);
     let size = std::fs::metadata(src)?.len();
     let _ = std::fs::remove_file(&dest);
-    let (dest, how) = if crate::local::clone_file(src, &dest) {
+    let (dest, how) = if found_in.is_some() {
+        crate::local::materialize(src, &dest)?
+    } else if crate::local::clone_file(src, &dest) {
         (dest, "clone")
-    } else if found_in.is_some() {
-        (std::fs::canonicalize(src)?, "reference")
     } else {
         if let Some(free) = free_space(&dir) {
             if free < size + 256 * 1024 * 1024 {
@@ -597,6 +609,8 @@ mod tests {
         assert_eq!(m.quant.as_deref(), Some("Q5_K_M"));
         assert!(Path::new(&m.path).starts_with(&root));
         assert!(db.installed_model(&m.id).unwrap().is_some());
+        let again = import(&db, &root, "asr", &src).unwrap();
+        assert_eq!(again.id, "custom-my-whisper-q5-k-m-2", "a same-named import must not take over the first entry");
         delete(&db, &root, &m.id).unwrap();
         assert!(!Path::new(&m.path).exists());
         assert!(src.exists(), "original file untouched");

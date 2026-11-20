@@ -223,7 +223,12 @@ pub struct Header {
 
 /// Read `general.architecture` / `general.name` from a GGUF header (stops early; never reads weights).
 pub fn gguf_header(path: &Path) -> Result<Header> {
-    let mut f = std::io::BufReader::new(std::fs::File::open(path)?);
+    let file = std::fs::File::open(path)?;
+    if !file.metadata()?.is_file() {
+        bail!("not a regular file");
+    }
+    // Files here can come from other accounts (/Users/Shared): never read more than a header's worth.
+    let mut f = std::io::BufReader::new(file).take(16 << 20);
     let mut magic = [0u8; 4];
     f.read_exact(&mut magic)?;
     if &magic != b"GGUF" {
@@ -254,18 +259,26 @@ pub fn gguf_header(path: &Path) -> Result<Header> {
             10..=12 => 8,
             _ => 0,
         };
+        fn skip_bytes(f: &mut dyn Read, n: u64) -> Result<()> {
+            if std::io::copy(&mut Read::take(&mut *f, n), &mut std::io::sink())? != n {
+                bail!("truncated GGUF header");
+            }
+            Ok(())
+        }
         if fixed > 0 {
-            std::io::copy(&mut f.take(fixed), &mut std::io::sink())?;
-            return Ok(());
+            return skip_bytes(f, fixed);
         }
         match t {
             8 => {
                 let n = rd_u64(f)?;
-                std::io::copy(&mut f.take(n), &mut std::io::sink())?;
+                skip_bytes(f, n)?;
             }
             9 => {
                 let et = rd_u32(f)?;
                 let n = rd_u64(f)?;
+                if et == 9 {
+                    bail!("nested GGUF arrays are not supported"); // real files never nest; unbounded recursion would overflow the stack
+                }
                 for _ in 0..n {
                     skip(f, et, rd_u32, rd_u64)?;
                 }
@@ -320,6 +333,12 @@ pub fn materialize(src: &Path, dest: &Path) -> Result<(PathBuf, &'static str)> {
     if clone_file(&src, dest) {
         return Ok((dest.to_path_buf(), "clone"));
     }
+    // Using a file in place lets its owner change it later; only do that for our own files.
+    use std::os::unix::fs::MetadataExt;
+    let mine = dest.parent().and_then(|d| std::fs::metadata(d).ok()).map(|m| m.uid());
+    if mine != Some(std::fs::metadata(&src)?.uid()) {
+        bail!("This file belongs to another user on this Mac and cannot be used in place");
+    }
     Ok((src, "reference"))
 }
 
@@ -368,6 +387,24 @@ mod tests {
         assert_eq!(role_for("gemma4", "m.gguf", false).as_deref(), Some("llm"));
         assert_eq!(role_for("parakeet", "x.gguf", false).as_deref(), Some("asr"));
         assert_eq!(role_for("qwen3", "qwen3-embedding.gguf", true).as_deref(), Some("embed"));
+    }
+
+    #[test]
+    fn hostile_headers_fail_fast() {
+        let d = tempfile::tempdir().unwrap();
+        let head = |kv_type: u32| { let mut b = b"GGUF".to_vec(); b.extend(3u32.to_le_bytes()); b.extend(0u64.to_le_bytes()); b.extend(1u64.to_le_bytes()); b.extend(1u64.to_le_bytes()); b.push(b'k'); b.extend(kv_type.to_le_bytes()); b };
+        // Deeply nested arrays: used to overflow the stack and abort the app.
+        let mut nested = head(9);
+        for _ in 0..200_000 { nested.extend(9u32.to_le_bytes()); nested.extend(1u64.to_le_bytes()); }
+        // An array claiming u64::MAX elements, then EOF: used to spin forever.
+        let mut huge = head(9);
+        huge.extend(0u32.to_le_bytes());
+        huge.extend(u64::MAX.to_le_bytes());
+        for (name, bytes) in [("nested.gguf", nested), ("huge.gguf", huge)] {
+            let p = d.path().join(name);
+            std::fs::write(&p, bytes).unwrap();
+            assert!(gguf_header(&p).is_err(), "{name}");
+        }
     }
 
     #[test]

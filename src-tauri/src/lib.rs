@@ -128,7 +128,12 @@ impl Core {
             return;
         }
         let max = (hardware::total_ram_gb() * 0.4 * 1_073_741_824.0) as u64; // leave room for speech and the OS
-        let Some(f) = found.iter().filter(|f| f.model_id.is_none() && f.role.as_deref() == Some("llm") && f.size <= max && !skip.contains(&f.path)).max_by_key(|f| f.size).cloned() else { return };
+        // Unverified files are only picked up silently when they are the user's own: another account
+        // on this Mac can write /Users/Shared. Others stay listed for the user to choose.
+        use std::os::unix::fs::MetadataExt;
+        let me = std::fs::metadata(&self.paths.root).map(|m| m.uid()).ok();
+        let mine = |p: &str| std::fs::metadata(p).ok().map(|m| m.uid()) == me && me.is_some();
+        let Some(f) = found.iter().filter(|f| f.model_id.is_none() && f.role.as_deref() == Some("llm") && f.size <= max && !skip.contains(&f.path) && mine(&f.path)).max_by_key(|f| f.size).cloned() else { return };
         let c = self.clone();
         let r = tokio::task::spawn_blocking(move || models::import_as(&c.db, &c.paths.models, "llm", Path::new(&f.path), Some(&f.source))).await;
         if let Ok(Ok(m)) = r {
@@ -156,7 +161,7 @@ impl Core {
     }
 
     pub fn delete_meeting(&self, id: &str) -> Result<()> {
-        let dir = asr::meeting_dir(self, id);
+        let dir = asr::checked_meeting_dir(self, id)?;
         if dir.exists() {
             std::fs::remove_dir_all(&dir)?;
         }
@@ -164,7 +169,7 @@ impl Core {
     }
 
     pub fn delete_audio(&self, id: &str) -> Result<()> {
-        let dir = asr::meeting_dir(self, id);
+        let dir = asr::checked_meeting_dir(self, id)?;
         for src in ["mic", "system"] {
             let p = dir.join(format!("{src}.pcm"));
             if p.exists() {
@@ -361,8 +366,9 @@ async fn transcribe_meeting(core: St<'_>, id: String) -> Res<()> {
         let _ = c.db.set_status(&id, "processing");
         let r = asr::transcribe_meeting(c.clone(), id.clone()).await;
         let _ = c.db.set_status(&id, "done");
-        if let Err(err) = &r {
-            (c.emit)("transcription-status", json!({"meetingId": id, "state": "error", "error": err.to_string()}));
+        match &r {
+            Ok(_) => capture::apply_retention(&c, &id),
+            Err(err) => (c.emit)("transcription-status", json!({"meetingId": id, "state": "error", "error": err.to_string()})),
         }
         (c.emit)("meeting-status", json!({"meetingId": id, "status": "done"}));
         let _ = chat::index_meeting(&c, &id).await;
@@ -623,7 +629,7 @@ fn e2e_enabled() -> Res<()> {
 #[tauri::command]
 async fn e2e_say(voice: String, text: String) -> Res<()> {
     e2e_enabled()?;
-    tokio::process::Command::new("say").arg("-v").arg(voice).arg(text).status().await.map_err(e)?;
+    tokio::process::Command::new("/usr/bin/say").arg("-v").arg(voice).arg(text).status().await.map_err(e)?;
     Ok(())
 }
 
@@ -655,7 +661,7 @@ fn e2e_exit(app: tauri::AppHandle, crash: bool) -> Res<()> {
 
 #[tauri::command]
 fn reveal_data_folder(core: St<'_>) -> Res<()> {
-    std::process::Command::new("open").arg(&core.paths.root).spawn().map_err(e)?;
+    std::process::Command::new("/usr/bin/open").arg(&core.paths.root).spawn().map_err(e)?;
     Ok(())
 }
 
@@ -665,7 +671,7 @@ fn open_privacy_settings(kind: String) -> Res<()> {
         "mic" => "Privacy_Microphone",
         _ => "Privacy_ScreenCapture",
     };
-    std::process::Command::new("open").arg(format!("x-apple.systempreferences:com.apple.preference.security?{pane}")).spawn().map_err(e)?;
+    std::process::Command::new("/usr/bin/open").arg(format!("x-apple.systempreferences:com.apple.preference.security?{pane}")).spawn().map_err(e)?;
     Ok(())
 }
 
@@ -687,7 +693,9 @@ async fn delete_all_data(core: St<'_>, include_models: bool) -> Res<()> {
             core.db.set_setting(key, &Value::Null).map_err(e)?;
         }
     }
-    core.db.conn().execute_batch("DELETE FROM chat_threads; DELETE FROM templates WHERE builtin=0; VACUUM;").map_err(e)?;
+    let c = core.db.conn();
+    c.execute_batch("DELETE FROM chat_threads; DELETE FROM templates WHERE builtin=0; INSERT INTO search_index(search_index) VALUES('optimize'); VACUUM;").map_err(e)?;
+    c.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(())).map_err(e)?;
     Ok(())
 }
 

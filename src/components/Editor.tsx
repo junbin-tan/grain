@@ -7,6 +7,12 @@ import TaskItem from "@tiptap/extension-task-item";
 import Link from "@tiptap/extension-link";
 import { Markdown } from "tiptap-markdown";
 
+// Every click on a link, with any modifier or button, stays in the app (handleClickOn misses some).
+function stayOnLinks(_view: unknown, event: MouseEvent) {
+  if ((event.target as HTMLElement).closest("a")) event.preventDefault();
+  return false;
+}
+
 /** Markdown-backed rich text editor used for both "My notes" and "Enhanced notes". */
 export function Editor({ value, onChange, placeholder, onTimestamp, autoFocus, className = "", docKey }: {
   value: string;
@@ -24,7 +30,7 @@ export function Editor({ value, onChange, placeholder, onTimestamp, autoFocus, c
   const editor = useEditor(
     {
       extensions: [
-        StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+        StarterKit.configure({ heading: { levels: [1, 2, 3] }, link: false }), // Link is configured below, once
         Placeholder.configure({ placeholder: placeholder ?? "Write notes…" }),
         TaskList,
         TaskItem.configure({ nested: true }),
@@ -41,6 +47,7 @@ export function Editor({ value, onChange, placeholder, onTimestamp, autoFocus, c
         }, 400);
       },
       editorProps: {
+        handleDOMEvents: { click: stayOnLinks, auxclick: stayOnLinks },
         handleClickOn: (_view, _pos, node, _np, event) => {
           const a = (event.target as HTMLElement).closest("a");
           if (!a) return false;

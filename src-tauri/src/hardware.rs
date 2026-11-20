@@ -29,7 +29,7 @@ pub fn total_ram_gb() -> f64 {
 pub fn detect(data_dir: &Path) -> Hardware {
     let mut s = sysinfo::System::new();
     s.refresh_memory();
-    let chip = std::process::Command::new("sysctl")
+    let chip = std::process::Command::new("/usr/sbin/sysctl")
         .args(["-n", "machdep.cpu.brand_string"])
         .output()
         .ok()

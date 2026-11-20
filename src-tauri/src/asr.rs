@@ -222,6 +222,14 @@ pub fn meeting_dir(core: &Core, meeting_id: &str) -> PathBuf {
     core.paths.recordings.join(meeting_id)
 }
 
+/// For deleting: an id like "", ".." or "/x" would point outside the meeting's own folder.
+pub fn checked_meeting_dir(core: &Core, meeting_id: &str) -> Result<PathBuf> {
+    if uuid::Uuid::parse_str(meeting_id).is_err() {
+        return Err(anyhow!("Not a meeting id: {meeting_id:?}"));
+    }
+    Ok(meeting_dir(core, meeting_id))
+}
+
 /// The speech model to use and the language hints, from settings.
 pub fn asr_config(core: &Core) -> Result<(String, PathBuf, Vec<String>)> {
     let id = core.db.setting_str("asrModel").ok_or_else(|| anyhow!("No speech model selected. Download one in Models."))?;

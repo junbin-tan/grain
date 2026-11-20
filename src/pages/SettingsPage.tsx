@@ -258,7 +258,7 @@ export function SettingsPage({ section: initial }: { section?: string }) {
                   <Row label="Keep audio after transcription" desc="Off: audio is deleted as soon as the transcript is saved. Deleting a meeting always deletes its audio.">
                     <Toggle label="Keep audio" checked={settings.keepAudio !== false} onChange={(v) => setSetting("keepAudio", v)} />
                   </Row>
-                  <Row label="Find models other apps downloaded" desc="Grain looks (read-only, on this Mac) in the Hugging Face cache used by Handy, Ollama, LM Studio, llama.cpp, Jan, GPT4All and /Users/Shared, so it never downloads a model twice. Found files are checked with SHA-256 and shared without extra disk space; the originals are never changed.">
+                  <Row label="Find models other apps downloaded" desc="Grain looks (read-only, on this Mac) in the Hugging Face cache used by Handy, Ollama, LM Studio, llama.cpp, Jan, GPT4All and /Users/Shared, so it never downloads a model twice. Copies of known models are checked with SHA-256 and shared without extra disk space; files from other accounts are only listed until you choose them. The originals are never changed.">
                     <Toggle label="Find models other apps downloaded" checked={settings.scanOtherApps !== false} onChange={async (v) => { await setSetting("scanOtherApps", v); await api.rescanLocalModels(); refreshCatalog(); }} />
                   </Row>
                   <Row label="Also look in these folders" desc={<>{((settings.modelFolders as string[]) ?? []).map((f) => (

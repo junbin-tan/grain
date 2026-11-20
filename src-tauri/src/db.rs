@@ -142,6 +142,11 @@ CREATE VIRTUAL TABLE search_index USING fts5(
   tokenize = 'trigram'
 );
 "#,
+    // Deleted text must not stay recoverable: drop FTS postings on delete, and purge what earlier deletes left.
+    r#"
+INSERT INTO search_index(search_index, rank) VALUES('secure-delete', 1);
+INSERT INTO search_index(search_index) VALUES('optimize');
+"#,
 ];
 
 pub struct Db {
@@ -379,8 +384,11 @@ impl Db {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         conn.pragma_update(None, "foreign_keys", "ON")?;
         conn.pragma_update(None, "synchronous", "NORMAL")?;
+        conn.pragma_update(None, "secure_delete", "ON")?; // freed pages are zeroed, so deleted text does not linger
         let db = Db { conn: Mutex::new(conn) };
-        db.migrate()?;
+        if db.migrate()? == 1 {
+            db.conn().execute_batch("VACUUM")?; // drop free pages that older versions left holding deleted text
+        }
         db.seed()?;
         Ok(db)
     }
@@ -399,7 +407,8 @@ impl Db {
         self.conn.lock().unwrap_or_else(|e| e.into_inner())
     }
 
-    fn migrate(&self) -> Result<()> {
+    /// Returns the schema version the database had before migrating.
+    fn migrate(&self) -> Result<i64> {
         let mut c = self.conn();
         let v: i64 = c.query_row("PRAGMA user_version", [], |r| r.get(0))?;
         for (i, sql) in MIGRATIONS.iter().enumerate().skip(v as usize) {
@@ -408,7 +417,7 @@ impl Db {
             tx.pragma_update(None, "user_version", (i + 1) as i64)?;
             tx.commit()?;
         }
-        Ok(())
+        Ok(v)
     }
 
     fn seed(&self) -> Result<()> {
@@ -541,9 +550,21 @@ impl Db {
     }
 
     pub fn delete_meeting(&self, id: &str) -> Result<()> {
-        let c = self.conn();
-        c.execute("DELETE FROM search_index WHERE meeting_id=?", [id])?;
-        c.execute("DELETE FROM meetings WHERE id=?", [id])?;
+        let mut c = self.conn();
+        let tx = c.transaction()?;
+        tx.execute("DELETE FROM search_index WHERE meeting_id=?", [id])?;
+        // Answers in global Ask threads embed excerpts of the meetings they cite.
+        const CITES: &str = "EXISTS (SELECT 1 FROM json_each(m.sources) j WHERE json_extract(j.value,'$.meetingId')=?1)";
+        // A global thread whose every answer cited this meeting goes entirely (its messages cascade).
+        tx.execute(
+            &format!("DELETE FROM chat_threads WHERE meeting_id IS NULL AND EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id=chat_threads.id AND m.role='assistant' AND {CITES}) AND NOT EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id=chat_threads.id AND m.role='assistant' AND NOT {CITES})"),
+            [id],
+        )?;
+        tx.execute(&format!("DELETE FROM chat_messages AS m WHERE {CITES}"), [id])?;
+        tx.execute("DELETE FROM meetings WHERE id=?", [id])?;
+        tx.commit()?;
+        // Old WAL frames still hold the deleted text until the WAL is truncated.
+        c.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |_| Ok(()))?;
         Ok(())
     }
 
@@ -1140,6 +1161,46 @@ mod tests {
             let n: i64 = c.query_row(&format!("SELECT COUNT(*) FROM {t}"), [], |r| r.get(0)).unwrap();
             assert_eq!(n, 0, "{t} not cleaned up");
         }
+    }
+
+    #[test]
+    fn deletes_leave_nothing_to_recover() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("grain.db");
+        // An install from before the purge migration: version 1, with residue from an old delete.
+        {
+            let c = Connection::open(&path).unwrap();
+            c.execute_batch(MIGRATIONS[0]).unwrap();
+            c.pragma_update(None, "user_version", 1).unwrap();
+        }
+        let db = Db::open(&path).unwrap();
+        let c = db.conn();
+        let on: i64 = c.query_row("PRAGMA secure_delete", [], |r| r.get(0)).unwrap();
+        let fts: i64 = c.query_row("SELECT v FROM search_index_config WHERE k='secure-delete'", [], |r| r.get(0)).unwrap();
+        assert_eq!((on, fts), (1, 1));
+        drop(c);
+        drop(db);
+        Db::open(&path).unwrap(); // reopening an upgraded database is a no-op
+    }
+
+    #[test]
+    fn delete_meeting_purges_global_ask_answers_that_cite_it() {
+        let db = Db::memory().unwrap();
+        let (a, b) = (db.create_meeting("a", "general").unwrap(), db.create_meeting("b", "general").unwrap());
+        let cite = |id: &str| serde_json::json!([{"n": 1, "meetingId": id, "excerpt": "x"}]);
+        let only_a = db.create_thread(None, "q").unwrap();
+        db.add_message(&only_a, "user", "q", &serde_json::json!([])).unwrap();
+        db.add_message(&only_a, "assistant", "from a", &cite(&a.id)).unwrap();
+        let mixed = db.create_thread(None, "q").unwrap();
+        db.add_message(&mixed, "assistant", "from a", &cite(&a.id)).unwrap();
+        db.add_message(&mixed, "assistant", "from b", &cite(&b.id)).unwrap();
+        let pending = db.create_thread(None, "q").unwrap();
+        db.add_message(&pending, "user", "still asking", &serde_json::json!([])).unwrap();
+        db.delete_meeting(&a.id).unwrap();
+        let ids: Vec<String> = db.threads(None).unwrap().iter().map(|t| t["id"].as_str().unwrap().to_string()).collect();
+        assert!(!ids.contains(&only_a) && ids.contains(&mixed) && ids.contains(&pending));
+        let left: Vec<String> = db.messages(&mixed).unwrap().into_iter().map(|m| m.content).collect();
+        assert_eq!(left, vec!["from b"]);
     }
 
     #[test]

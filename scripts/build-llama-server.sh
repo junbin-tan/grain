@@ -3,6 +3,8 @@
 # Pinned to a llama.cpp tag so builds are reproducible.
 set -euo pipefail
 TAG="${LLAMA_CPP_TAG:-v1.0.0}"
+# The commit $TAG points to. Tags can move upstream, so the build only trusts this hash.
+COMMIT="${LLAMA_CPP_COMMIT:-b1b770d90d94cad9e9ea5b993bdbc383a522fb28}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="${LLAMA_CPP_WORK:-$ROOT/.build/llama.cpp}"
 TRIPLE="$(rustc -vV | sed -n 's/^host: //p')"
@@ -10,6 +12,10 @@ OUT="$ROOT/src-tauri/binaries/llama-server-$TRIPLE"
 
 if [ ! -d "$WORK/.git" ]; then
   git clone --depth 1 --branch "$TAG" https://github.com/ggml-org/llama.cpp.git "$WORK"
+fi
+if [ "$(git -C "$WORK" rev-parse HEAD)" != "$COMMIT" ]; then
+  echo "llama.cpp in $WORK is not $COMMIT ($TAG). Delete it and rebuild, or update LLAMA_CPP_COMMIT after review." >&2
+  exit 1
 fi
 rm -rf "$WORK/build/tools/ui"  # never embed a web UI; Grain talks to llama-server over loopback only
 cmake -S "$WORK" -B "$WORK/build" -DCMAKE_BUILD_TYPE=Release \

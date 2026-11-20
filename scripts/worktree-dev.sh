@@ -24,4 +24,4 @@ while lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; do PORT=$((PORT + 1))
 
 echo "branch: $BRANCH  port: $PORT  data: $DATA"
 export GRAIN_DATA_DIR="$DATA"
-exec npx tauri dev --config "{\"build\":{\"devUrl\":\"http://localhost:$PORT\",\"beforeDevCommand\":\"npm run dev -- --port $PORT\"}}"
+exec npx tauri dev --config "{\"build\":{\"devUrl\":\"http://127.0.0.1:$PORT\",\"beforeDevCommand\":\"npm run dev -- --port $PORT\"}}"
