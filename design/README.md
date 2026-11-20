@@ -2,6 +2,8 @@
 
 **A private AI notepad for meetings.** Grain records, transcribes and writes up your meetings on your Mac: no bot, no account, no cloud. This system is the brand and interface language for the macOS app, its website and its README.
 
+**See it all on one page:** open [`index.html`](index.html) in a browser (works offline, follows `tokens.css` live, light and dark).
+
 Three ideas shape every decision here:
 
 1. **It stays on your Mac.** The brand feels like paper and a desk, not a server or a data centre. Warm, physical, quiet.
@@ -34,7 +36,7 @@ Lowercase **grain** in Inter Display SemiBold with tight tracking (−0.035em). 
 | `grain-mark-reverse.svg` | Mark alone on dark grounds |
 | `grain-mark-mono-ink.svg`, `-mono-paper.svg` | One-colour use: embossing, fax-grade print, the macOS menu-bar template image |
 | `grain-wordmark.svg`, `-reverse.svg` | Wordmark alone, where the mark already appears nearby (e.g. the app icon is in view) |
-| `grain-app-icon.svg`, `-1024…16.png` | macOS app icon: soil squircle, paper bars, malt centre bar |
+| `grain-app-icon.svg`, `-1024…16.png` | macOS app icon: butter-yellow (`malt`) squircle, ink bars, `paper-raised` centre bar |
 
 **Clear space:** keep at least the height of the *i*'s tittle-to-baseline (about one x-height) clear on every side of the lockup. **Minimum size:** lockup 72px wide on screen, mark 16px, app icon 16px (verified at 16, 32, 64).
 
