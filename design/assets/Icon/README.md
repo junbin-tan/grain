@@ -1,3 +1,3 @@
 # Icon
 
-The macOS app icon: an 824px squircle body on a 1024 canvas (Apple's icon grid) in butter-yellow `malt` #F0CB5E, `ink` #3B322B bars, centre bar in `paper-raised` #F4EDE3. PNGs at 1024, 512, 256, 128, 64, 32 and 16 for building the `.icns` (`iconutil`) and the favicon, on transparent backgrounds. Checked for legibility at 16px.
+The macOS app icon: an 824px squircle body on a 1024 canvas (Apple's icon grid) in butter-yellow `malt` #F0CB5E, honey-brown #8F6C2C bars, and the centre bar in `ink` #3B322B. The highlight is the darkest bar, so it stands out by lightness, not hue: on the yellow it measures at least 7.6:1 and the other bars at least 3.0:1, and it holds at least 2.4:1 against the bars beside it, under normal vision, protanopia, deuteranopia and tritanopia (Machado 2009) and in greyscale. PNGs at 1024, 512, 256, 128, 64, 32 and 16 for building the `.icns` (`iconutil`) and the favicon, on transparent backgrounds. Checked for legibility at 16 and 32px.
