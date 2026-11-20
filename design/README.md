@@ -44,31 +44,32 @@ Lowercase **grain** in Inter Display SemiBold with tight tracking (−0.035em). 
 
 ## Colour
 
-The palette is **unbleached paper, dark soil, and malt amber**: harvest colours, not tech colours. There are no blues or purples, and no gradients.
+The palette is **soft clay, warm cocoa and butter yellow**: warm and light, never harsh. Nothing is pure white or pure black: the light ground is a soft oat-clay and text is a soft cocoa, so long notes are easy on the eyes. There are no blues or purples, and no gradients.
 
 | Role | Token | Light | Dark |
 |---|---|---|---|
-| Ground | `paper` | #F6F1E7 husk | #15120E soil |
-| Sheet / card | `paper-raised` | #FFFCF6 | #1E1A15 |
-| Inset / sidebar | `paper-sunken` | #ECE5D7 | #0E0C09 |
-| Text | `ink` | #1E1A15 | #F3ECDF |
-| Secondary text | `ink-muted` | #5C5348 | #B4A994 |
-| Brand accent (fill) | `malt` | #C8862E | #E0A04A |
-| Accent as text | `malt-ink` | #8A5410 | #E9B46A |
-| Verified | `sprout` | #3D7148 | #86BE91 |
-| Unverified / destructive | `clay` | #A24419 | #E9875F |
-| Recording dot | `rec` | #D0432C | #EF6B58 |
+| Ground | `paper` | #EEE6DA oat clay | #221D19 cocoa |
+| Sheet / card | `paper-raised` | #F4EDE3 | #2A2420 |
+| Inset / sidebar | `paper-sunken` | #E6DCCE | #1A1613 |
+| Text | `ink` | #3B322B | #E8DFD3 |
+| Secondary text | `ink-muted` | #65584E | #BBAE9F |
+| Brand accent (fill) | `malt` | #F0CB5E | #E9C463 |
+| Accent as text | `malt-ink` | #73520F | #EFCF7A |
+| Verified | `sprout` | #3F6B49 | #93C49E |
+| Unverified / destructive | `clay` | #9A3F27 | #EC9474 |
+| Recording dot | `rec` | #CF4A35 | #EF6B58 |
 
 **Rules that name tokens:**
 
 - Spend `malt` sparingly. It marks *the cited moment* (a highlighted transcript line, a citation chip, the live waveform, the primary action), and its scarcity is what makes it read. Most screens are `paper`, `paper-raised`, `ink` and `ink-muted`.
-- `malt` is a fill. When amber must be read as text or a line, use `malt-ink`. On a `malt` fill, text is always `on-malt` (dark), never white.
+- `malt` is a fill. Yellow can't be read as text on a light ground (1.4:1), so when the accent must be text or a line, use `malt-ink`. On a `malt` fill, text is always `on-malt` (dark), never white.
 - **Speakers:** `speaker-me` is `ink`; `speaker-them` is `malt-ink`. They differ in lightness as well as hue, so they stay distinct for colour-blind users and in greyscale.
 - **Trust states** use `sprout` (found in transcript, on-device) and `clay` (not found, removed by the checker). Always pair the colour with a word and an icon, never colour alone.
 - `rec` is only ever the recording dot. General errors use `clay`.
+- `clay` is the error colour, not the background. The grounds are clay-tinted, so keep `clay` text deep and always paired with a word and an icon.
 - Dividers use `line`; anything you can click or type into is bounded by `line-strong` (3:1).
 
-All text pairs above meet WCAG AA (4.5:1) in both themes. `ink-subtle` (light) is 3.4:1: use it for icons and large labels only.
+Don't introduce pure white (`#FFF`) surfaces; `paper-raised` is the lightest surface. All text pairs above meet WCAG AA (4.5:1) in both themes. `ink-subtle` (light) is 3.6:1: use it for icons and large labels only.
 
 ---
 
