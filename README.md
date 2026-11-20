@@ -2,7 +2,7 @@
 
 **A private AI notepad for meetings that runs entirely on your Mac.**
 
-**[Download Grain for Mac](https://github.com/junbin-tan/grain/releases/latest)** (macOS 14+, Apple Silicon) · [Install notes](#install-macos-14-apple-silicon) · [Contributing](CONTRIBUTING.md) · MIT licence
+**[Download Grain for Mac](https://github.com/junbin-tan/grain/releases/latest/download/Grain.dmg)** (macOS 14+, Apple Silicon) · [Install notes](#install-macos-14-apple-silicon) · [Contributing](CONTRIBUTING.md) · MIT licence
 
 Grain records your microphone and your computer's audio (no meeting bot), transcribes on-device with open-weight speech models, and turns your rough notes plus the transcript into structured meeting notes with a local LLM. Decisions and action items link back to the moment they were said. You can search every meeting and ask questions across them. There is no account and no cloud, and after the one-time model downloads Grain works with the internet switched off.
 
@@ -26,18 +26,12 @@ Grain records your microphone and your computer's audio (no meeting bot), transc
 
 ## Install (macOS 14+, Apple Silicon)
 
-**[Download the latest Grain.dmg](https://github.com/junbin-tan/grain/releases/latest)**, open it and drag Grain to Applications.
+**[Download the latest Grain.dmg](https://github.com/junbin-tan/grain/releases/latest/download/Grain.dmg)**, open it and drag Grain to Applications.
 
 Grain is not notarised by Apple yet (that needs a paid Apple Developer ID), so macOS blocks the first launch:
 
 1. Open Grain. macOS says it can't verify the developer. Click **Done**.
 2. Open **System Settings → Privacy & Security**, scroll down and click **Open Anyway** next to Grain.
-
-Or clear the quarantine flag in Terminal:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/Grain.app
-```
 
 Then run through onboarding: choose your languages, download the recommended models, allow Microphone and "Screen & System Audio Recording", and run the audio test.
 
