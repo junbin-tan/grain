@@ -30,9 +30,8 @@ export function RecDot({ pulse, className = "size-2" }: { pulse?: boolean; class
   return <span aria-hidden className={`shrink-0 rounded-full bg-rec ${pulse ? "animate-pulse-rec" : ""} ${className}`} />;
 }
 
-/** Every control that starts audio capture looks the same: the red dot leads the label. */
-export function RecordButton({ variant = "primary", loading, children, ...rest }: Parameters<typeof Button>[0]) {
-  return <Button variant={variant} loading={loading} {...rest}>{!loading && <RecDot />}{children}</Button>;
+export function RecordButton({ variant = "primary", ...props }: Parameters<typeof Button>[0]) {
+  return <Button variant={variant} {...props} className={`rounded-[var(--radius-pill)] ${props.className ?? ""}`} />;
 }
 
 /** Links a claim to the transcript moment it came from. */

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowLeft, ArrowUp, AudioLines, ChevronDown, ChevronUp, Download, Flag, Mic, MoreHorizontal, Pause, Play, RotateCcw, Trash2, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowUp, AudioLines, ChevronDown, ChevronUp, Download, Flag, Mic, MoreHorizontal, Pause, RotateCcw, Trash2, X } from "lucide-react";
 import { confirm } from "../lib/dialogs";
 import { api, on, type Device, type MeetingDetail, type Segment, type Template } from "../lib/api";
 import { fmtDate, fmtDuration, fmtTime, fmtTs } from "../lib/format";
@@ -9,7 +9,7 @@ import { TranscriptView } from "../components/Transcript";
 import { EnhancedView, useEnhance } from "../components/EnhancedView";
 import { AskPanel, SUGGESTIONS_MEETING } from "../components/AskPanel";
 import { ExportDialog } from "../components/ExportDialog";
-import { Badge, Banner, Button, GrainMark, IconButton, Kbd, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner, Toggle } from "../components/ui";
+import { Badge, Banner, Button, GrainMark, IconButton, LevelBars, Menu, MenuItem, RecDot, RecordButton, Spinner, Toggle } from "../components/ui";
 
 export function MeetingPage({ id, tab: initialTab, at }: { id: string; tab?: Tab; at?: number }) {
   const { recording, processing, navigate, back, refreshMeetings, startRecording, settings, catalog, toast } = useApp();
@@ -267,7 +267,11 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, bus
               {r ? (
                 <>
                   <IconButton className="size-7" label="Mark important moment (⌘M)" onClick={mark}><Flag className="size-3.5" /></IconButton>
-                  <IconButton className="size-7" label={r.paused ? "Resume (⌘⇧P)" : "Pause (⌘⇧P)"} onClick={() => (r.paused ? api.resumeRecording() : api.pauseRecording())}>{r.paused ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}</IconButton>
+                  {r.paused ? (
+                    <RecordButton size="sm" aria-label="Resume (⌘⇧P)" title="Resume (⌘⇧P)" onClick={() => api.resumeRecording()}>Resume</RecordButton>
+                  ) : (
+                    <IconButton className="size-7" label="Pause (⌘⇧P)" onClick={() => api.pauseRecording()}><Pause className="size-3.5" /></IconButton>
+                  )}
                   <span className={`flex items-center gap-1 ${r.systemOn ? "text-speaker-them" : "text-ink-subtle"}`} title={r.systemOn ? "Them: computer audio" : "Computer audio off"}>
                     <AudioLines className="size-3.5" /><LevelBars level={r.system} active={r.systemOn && !r.paused} />
                   </span>
@@ -295,8 +299,8 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, bus
         ) : enhance.stage ? (
           <div className={`${pill} h-9 gap-2 px-4 text-[13px] text-ink-muted`}><GrainMark className="size-4" /> Enhancing notes on this Mac…</div>
         ) : !hasEnhanced && (
-          <Button variant="accent" className="rounded-full" disabled={!hasInput || !!busy} onClick={() => enhance.run()}>
-            <GrainMark mono />Enhance notes <Kbd>⌘E</Kbd>
+          <Button variant="accent" title="Enhance notes (⌘E)" aria-keyshortcuts="Meta+E" disabled={!hasInput || !!busy} onClick={() => enhance.run()}>
+            <GrainMark mono />Enhance notes
           </Button>
         )}
 
@@ -312,7 +316,7 @@ function Dock({ isRecording, neverRecorded, starting, record, mark, enhance, bus
           ) : (
             <div className={`${pill} h-11 gap-1 pr-1.5 pl-2`}>
               {chevron}
-              <RecordButton variant={neverRecorded ? "primary" : "ghost"} size="sm" loading={starting} disabled={!!busy} onClick={record}>{neverRecorded ? "Start recording" : "Resume"}</RecordButton>
+              <RecordButton size="sm" loading={starting} disabled={!!busy} onClick={record}>{neverRecorded ? "Start recording" : "Resume"}</RecordButton>
             </div>
           )}
           {!askOpen && (
