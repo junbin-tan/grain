@@ -2,6 +2,8 @@
 
 **A private AI notepad for meetings that runs entirely on your Mac.**
 
+**[Download Grain for Mac](https://github.com/junbin-tan/grain/releases/latest)** (macOS 14+, Apple Silicon) · [Install notes](#install-macos-14-apple-silicon) · [Contributing](CONTRIBUTING.md) · MIT licence
+
 Grain records your microphone and your computer's audio (no meeting bot), transcribes on-device with open-weight speech models, and turns your rough notes plus the transcript into structured meeting notes with a local LLM. Decisions and action items link back to the moment they were said. You can search every meeting and ask questions across them. There is no account and no cloud, and after the one-time model downloads Grain works with the internet switched off.
 
 ![Grain meeting view](docs/screenshots/04a-meeting-enhanced.png)
@@ -24,7 +26,14 @@ Grain records your microphone and your computer's audio (no meeting bot), transc
 
 ## Install (macOS 14+, Apple Silicon)
 
-The build produces `src-tauri/target/release/bundle/macos/Grain.app` and a `.dmg` in `bundle/dmg/`. The app is **not code-signed or notarised** (that needs an Apple Developer ID), so the first launch needs a right-click, then **Open**. You can also clear the quarantine flag:
+**[Download the latest Grain.dmg](https://github.com/junbin-tan/grain/releases/latest)**, open it and drag Grain to Applications.
+
+Grain is not notarised by Apple yet (that needs a paid Apple Developer ID), so macOS blocks the first launch:
+
+1. Open Grain. macOS says it can't verify the developer. Click **Done**.
+2. Open **System Settings → Privacy & Security**, scroll down and click **Open Anyway** next to Grain.
+
+Or clear the quarantine flag in Terminal:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Grain.app
@@ -74,6 +83,10 @@ GUI end-to-end test of every feature through the real UI (release app, a fresh d
 | [PRIVACY](docs/PRIVACY.md) | Network behaviour, storage, retention, deletion |
 | [TEST_PLAN](docs/TEST_PLAN.md) | Tests and measured results |
 | [KNOWN_LIMITATIONS](docs/KNOWN_LIMITATIONS.md) | What doesn't work yet |
+
+## Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits and licences
 

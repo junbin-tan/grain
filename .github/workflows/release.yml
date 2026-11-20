@@ -1,0 +1,45 @@
+# Push a tag like v0.1.0 and this builds Grain.dmg and attaches it to a GitHub Release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    runs-on: macos-15 # Apple Silicon, matches Grain's only supported platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+      - run: npm run sidecars
+      - name: Build DMG
+        # shortcut: ad-hoc signature ("-"), so users still click "Open Anyway" once; add a Developer ID cert + notarisation to remove that.
+        env:
+          APPLE_SIGNING_IDENTITY: "-"
+        run: npx tauri build --bundles dmg
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" src-tauri/target/release/bundle/dmg/*.dmg \
+            --title "Grain $GITHUB_REF_NAME" --generate-notes \
+            --notes "Download the .dmg below (macOS 14+, Apple Silicon). First launch: see Install in the README."
+      - name: Keep DMG as a build artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Grain-dmg
+          path: src-tauri/target/release/bundle/dmg/*.dmg
