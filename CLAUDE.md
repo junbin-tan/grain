@@ -1,5 +1,9 @@
 # Grain: project rules
 
+## Architecture
+
+Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) before changing anything that crosses modules (IPC commands, events, schema, capture, models, notes, Ask Grain). It has the process diagram, repo map, IPC/event catalogue, lifecycles, settings keys and a "where to change things" table. Update it in the same change when you alter any of those.
+
 ## Design system (mandatory for all UI work)
 
 Every screen, component, icon, string and asset follows the Grain design system in [design/](design/). Read [design/README.md](design/README.md) before building or changing UI, and the matching `design/components/*/README.md` before touching a component. [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) explains how the app wires it up.
