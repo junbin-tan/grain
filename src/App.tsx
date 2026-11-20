@@ -41,8 +41,8 @@ function Shell() {
 
   return (
     <div className="flex h-full" data-sidebar={settings.sidebarCollapsed ? "collapsed" : "open"}>
-      {/* Sits beside the traffic lights whether or not the sidebar is shown. */}
-      <div className="no-drag no-print fixed top-3 left-[78px] z-30 flex gap-0.5">
+      {/* The native close button is centered 22 pt from the top with our Tauri title bar inset. */}
+      <div className="no-drag no-print fixed top-[22px] left-[78px] z-30 flex -translate-y-1/2 gap-0.5">
         <IconButton className="size-7" label={settings.sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => setSetting("sidebarCollapsed", !settings.sidebarCollapsed)}><PanelLeft className="size-4" /></IconButton>
         <IconButton className="size-7" label="Search (⌘K)" onClick={() => setSearchOpen(true)}><Search className="size-4" /></IconButton>
       </div>
