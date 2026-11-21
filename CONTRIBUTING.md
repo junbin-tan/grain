@@ -33,6 +33,6 @@ Bump the version in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/C
 git tag v0.1.1 && git push origin v0.1.1
 ```
 
-The Release workflow builds the `.dmg` and publishes it on the GitHub Releases page.
+The Release workflow builds `Grain.pkg` (installs into Applications) and `Grain.dmg` and publishes both on the GitHub Releases page.
 
 By contributing you agree that your contributions are licensed under the [MIT License](LICENSE).

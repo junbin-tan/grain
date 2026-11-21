@@ -57,7 +57,7 @@ Three OS processes at most during a meeting: the app (UI + Rust core + ASR threa
 | `native/macos/grain-capture/main.swift` | Capture helper: subcommands `record`, `devices`, `permissions`, `request-mic`, `request-screen` |
 | `src-tauri/binaries/` | Built sidecars `grain-capture-<triple>`, `llama-server-<triple>` (from `scripts/`) |
 | `scripts/` | `build-capture.sh`, `build-llama-server.sh` (pinned llama.cpp commit), `reinstall.sh`, `e2e-gui.sh`, `offline.sh`, worktree helpers, site screenshots |
-| `.github/workflows/` | `ci.yml` (typecheck, lint, vitest), `release.yml` (tag `v*` → sidecars → DMG → GitHub release) |
+| `.github/workflows/` | `ci.yml` (typecheck, lint, vitest), `release.yml` (tag `v*` → sidecars → app + DMG → `.pkg` installer → GitHub release) |
 
 ## 3. Module responsibilities (backend)
 
@@ -411,7 +411,7 @@ flowchart LR
   Sidecars --> Build["tauri build<br/>(npm run build: tsc + vite → dist/)"]
   Build --> App["Grain.app / DMG<br/>externalBin: both sidecars"]
   App --> RI["scripts/reinstall.sh → /Applications"]
-  Tag["git tag v*"] --> GH["release.yml (macos-15)<br/>sidecars → DMG → GitHub release"]
+  Tag["git tag v*"] --> GH["release.yml (macos-15)<br/>sidecars → app + DMG → .pkg → GitHub release"]
   PR["push / PR"] --> CI["ci.yml: typecheck, lint, vitest"]
 ```
 

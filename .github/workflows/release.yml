@@ -1,4 +1,4 @@
-# Push a tag like v0.1.0 and this builds Grain.dmg and attaches it to a GitHub Release.
+# Push a tag like v0.1.0 and this builds Grain.pkg (installs into /Applications) and Grain.dmg and attaches both to a GitHub Release.
 name: Release
 
 on:
@@ -24,33 +24,52 @@ jobs:
           workspaces: src-tauri
       - run: npm ci
       - run: npm run sidecars
-      - name: Build DMG
+      - name: Build app and DMG
         # shortcut: ad-hoc signature ("-"), so users still click "Open Anyway" once; add a Developer ID cert + notarisation to remove that.
         env:
           APPLE_SIGNING_IDENTITY: "-"
+          # Tauri skips the Finder layout on CI, leaving a DMG window without the drag-to-Applications arrangement.
+          TAURI_BUNDLER_DMG_IGNORE_CI: "true"
         run: |
           # The Metal backend uses Clang's runtime for macOS availability checks.
           export RUSTFLAGS="-C link-arg=$(xcrun clang --print-resource-dir)/lib/darwin/libclang_rt.osx.a"
-          npx tauri build --bundles dmg
+          npx tauri build --bundles app,dmg
+      - name: Build installer
+        # A DMG only mounts; people run Grain from it and it never reaches Applications. The .pkg installs it there.
+        run: |
+          mkdir pkgroot
+          ditto src-tauri/target/release/bundle/macos/Grain.app pkgroot/Grain.app
+          pkgbuild --analyze --root pkgroot component.plist
+          # Relocatable would "upgrade" a stray copy (Downloads, a mounted DMG) in place instead of installing to /Applications.
+          plutil -replace 0.BundleIsRelocatable -bool NO component.plist
+          pkgbuild --root pkgroot --component-plist component.plist --install-location /Applications \
+            --identifier computer.grain.app.pkg --version "$(jq -r .version src-tauri/tauri.conf.json)" Grain.pkg
+          mv src-tauri/target/release/bundle/dmg/*.dmg Grain.dmg
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           test "$GITHUB_REF_NAME" = "v$(jq -r .version src-tauri/tauri.conf.json)"
-          mv src-tauri/target/release/bundle/dmg/*.dmg Grain.dmg
           cat > release-notes.md <<EOF
-          **[Download Grain for Mac](https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Grain.dmg)** · Apple Silicon (M-series), macOS 14 or later
+          **[Download Grain for Mac](https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Grain.pkg)** · Apple Silicon (M-series), macOS 14 or later
 
-          1. Open Grain.dmg and drag Grain into Applications.
-          2. Open Grain from Applications. If macOS blocks the first launch, dismiss the alert, then choose **System Settings → Privacy & Security → Open Anyway**. This build is ad-hoc signed and has not been notarised by Apple.
-          3. Follow setup to choose your models and allow microphone and system audio recording. New model downloads need an internet connection. After setup, recording, transcription and notes work offline.
+          1. Open Grain.pkg. This build is not notarised by Apple, so macOS says it could not verify it. Click **Done**.
+          2. Open **System Settings → Privacy & Security**, scroll down and click **Open Anyway** next to Grain.pkg, then click **Open Anyway** again and enter your Mac password.
+          3. Click through the installer. It puts Grain in Applications. Open Grain from Applications or Launchpad. If macOS asks about Grain itself, use **Open Anyway** the same way. You only do this once.
+          4. Follow setup to choose your models and allow microphone and system audio recording. New model downloads need an internet connection. After setup, recording, transcription and notes work offline.
+
+          Prefer to drag it in yourself? Use [Grain.dmg](https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Grain.dmg): drag Grain onto Applications, eject the disk, then open Grain from Applications.
+
+          If macOS says Grain is damaged, run \`xattr -dr com.apple.quarantine /Applications/Grain.app\` in Terminal, then open Grain again.
           EOF
-          gh release create "$GITHUB_REF_NAME" Grain.dmg --verify-tag \
+          gh release create "$GITHUB_REF_NAME" Grain.pkg Grain.dmg --verify-tag \
             --title "Grain $GITHUB_REF_NAME" --notes-file release-notes.md
-      - name: Keep DMG as a build artifact
+      - name: Keep the installers as a build artifact
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
         with:
-          name: Grain-dmg
-          path: src-tauri/target/release/bundle/dmg/*.dmg
+          name: Grain-installers
+          path: |
+            Grain.pkg
+            Grain.dmg
